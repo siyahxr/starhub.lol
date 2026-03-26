@@ -20,37 +20,33 @@
     <aside class="sidebar">
         <div class="logo-container">
             <div class="logo-icon">
-                <i data-lucide="star" style="color: white; fill: white;"></i>
+                <i data-lucide="star" style="color: #0d1117; fill: #0d1117;"></i>
             </div>
             <span class="logo-text">StarHUB</span>
         </div>
 
         <nav class="nav-links">
-            <a href="#" class="nav-item active">
+            <a href="#" class="nav-item active" onclick="updateNav(this, 'Home')">
                 <i data-lucide="home"></i>
                 <span>Home</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="updateNav(this, 'Media')">
                 <i data-lucide="video"></i>
                 <span>Media</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="updateNav(this, 'Community')">
                 <i data-lucide="users"></i>
                 <span>Community</span>
             </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="layout-dashboard"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="updateNav(this, 'Marketplace')">
                 <i data-lucide="shopping-cart"></i>
                 <span>Marketplace</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="updateNav(this, 'Ranking')">
                 <i data-lucide="trophy"></i>
                 <span>Ranking</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item" onclick="updateNav(this, 'Coaching')">
                 <i data-lucide="graduation-cap"></i>
                 <span>Coaching</span>
             </a>
@@ -76,124 +72,21 @@
             </div>
 
             <div class="topbar-actions">
-                <a href="#" class="btn btn-ghost">Get Started</a>
-                <a href="#" class="btn btn-primary">Login with Discord</a>
+                <a href="#" class="btn btn-ghost" onclick="renderView('Home')">Home</a>
+                <a href="https://discord.com/oauth2/authorize?client_id=1486756004883595284&response_type=code&redirect_uri=http%3A%2F%2Fstarhub.lol%2F&scope=identify+guilds.join" class="btn btn-primary" id="loginBtn">Login with Discord</a>
             </div>
         </header>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-glow" style="top: -100px; right: -100px;"></div>
-            <div class="hero-glow" style="bottom: -100px; left: -100px; opacity: 0.4;"></div>
-            
-            <div class="hero-content">
-                <p class="hero-tagline animate">Designed to Stand Out</p>
-                <h1 class="hero-title animate">Build your creator <br><span>identity.</span></h1>
-                <p class="hero-description animate">StarHUB is a all-in-one ecosystem for creators, businesses and brands. <br>Design, grow, and monetize your influence with ease.</p>
-                
-                <div class="hero-actions animate">
-                    <a href="#" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">Explore Marketplace</a>
-                </div>
-
-                <div class="stats-grid animate">
-                    <div class="stat-item">
-                        <h3>14.5k+</h3>
-                        <p>Verified Creators</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>2,840</h3>
-                        <p>Active Workflows</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>98%</h3>
-                        <p>Satisfaction Rate</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Marketplace Section -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    <h2>Featured Creators</h2>
-                    <p>Hand-picked talent from our global community.</p>
-                </div>
-                <div class="section-actions">
-                    <a href="#" class="btn btn-ghost">View All <i data-lucide="chevron-right" style="width: 16px; display: inline; vertical-align: middle;"></i></a>
-                </div>
-            </div>
-
-            <div class="creators-grid" id="creators-container">
-                <!-- Creator Card 1 -->
-                <div class="creator-card animate">
-                    <div class="creator-header">
-                        <div class="creator-avatar" style="background: linear-gradient(45deg, #7c4dff, #ff4081);"></div>
-                        <div class="creator-info">
-                            <h4>Zypher_Design</h4>
-                            <span>UI/UX & Branding</span>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">I create high-end visual identities for esports teams and individual creators.</p>
-                    <div class="creator-tags">
-                        <span class="tag">Branding</span>
-                        <span class="tag">Gaming</span>
-                        <span class="tag">3D Art</span>
-                    </div>
-                    <div class="creator-footer">
-                        <div class="price">$45.00 <span>/ initial</span></div>
-                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
-                    </div>
-                </div>
-
-                <!-- Creator Card 2 -->
-                <div class="creator-card animate">
-                    <div class="creator-header">
-                        <div class="creator-avatar" style="background: linear-gradient(45deg, #00d2ff, #3a7bd5);"></div>
-                        <div class="creator-info">
-                            <h4>NovaStreams</h4>
-                            <span>Stream Management</span>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Optimizing your stream performance and engagement through advanced tools.</p>
-                    <div class="creator-tags">
-                        <span class="tag">Streaming</span>
-                        <span class="tag">Automation</span>
-                    </div>
-                    <div class="creator-footer">
-                        <div class="price">$29.00 <span>/ month</span></div>
-                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
-                    </div>
-                </div>
-
-                <!-- Creator Card 3 -->
-                <div class="creator-card animate">
-                    <div class="creator-header">
-                        <div class="creator-avatar" style="background: linear-gradient(45deg, #f8ff00, #3ad59f);"></div>
-                        <div class="creator-info">
-                            <h4>EliteEdits</h4>
-                            <span>Video Production</span>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Cinematic video editing and montage creation for professional gamers.</p>
-                    <div class="creator-tags">
-                        <span class="tag">Video Editing</span>
-                        <span class="tag">Cinema 4D</span>
-                    </div>
-                    <div class="creator-footer">
-                        <div class="price">$75.00 <span>/ project</span></div>
-                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <main id="mainContent">
+            <!-- Content will be rendered here dynamically -->
+        </main>
 
         <!-- Footer -->
         <footer class="section" style="border-top: 1px solid var(--border-color); margin-top: 4rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
                 <div class="logo-container" style="margin-bottom: 0;">
                     <div class="logo-icon">
-                        <i data-lucide="star" style="color: white; fill: white;"></i>
+                        <i data-lucide="star" style="color: #0d1117; fill: #0d1117;"></i>
                     </div>
                     <span class="logo-text">StarHUB</span>
                 </div>
@@ -207,36 +100,310 @@
         </footer>
     </div>
 
+    <!-- Modal System -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Toast System -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- Script -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Simple Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1
-        };
+        // Modal Logic
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
+        function openModal(html) {
+            modalContent.innerHTML = html;
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
-        document.querySelectorAll('.animate').forEach(el => {
-            observer.observe(el);
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
         });
 
-        // Add CSS for visibility
-        const style = document.createElement('style');
-        style.textContent = `
-            .animate { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
-            .animate.visible { opacity: 1; transform: translateY(0); }
-        `;
-        document.head.appendChild(style);
+        // Toast Logic
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" style="width: 18px;"></i>
+                <span>${message}</span>
+            `;
+            toastContainer.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // View Templates
+        const views = {
+            Home: `
+                <section class="hero">
+                    <div class="hero-glow" style="top: -100px; right: -100px;"></div>
+                    <div class="hero-content">
+                        <p class="hero-tagline animate">Designed to Stand Out</p>
+                        <h1 class="hero-title animate">Build your creator <br><span>identity.</span></h1>
+                        <p class="hero-description animate">StarHUB is a all-in-one ecosystem for creators, businesses and brands.</p>
+                        <div class="hero-actions animate">
+                            <a href="#" class="btn btn-primary" onclick="renderView('Marketplace')">Explore Marketplace</a>
+                        </div>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Featured Creators</h2>
+                            <p>Hand-picked talent from our global community.</p>
+                        </div>
+                    </div>
+                    <div class="creators-grid">
+                        ${renderCreatorCard('Zypher_Design', 'UI/UX & Branding', '$45.00', 'linear-gradient(45deg, #7c4dff, #ff4081)')}
+                        ${renderCreatorCard('NovaStreams', 'Stream Management', '$29.00', 'linear-gradient(45deg, #00d2ff, #3a7bd5)')}
+                        ${renderCreatorCard('EliteEdits', 'Video Production', '$75.00', 'linear-gradient(45deg, #f8ff00, #3ad59f)')}
+                    </div>
+                </section>
+            `,
+            Media: `
+                <section class="section">
+                    <div class="section-title">
+                        <h2>Media Gallery</h2>
+                        <p>Latest works and highlights from StarHUB creators.</p>
+                    </div>
+                    <div class="creators-grid" style="margin-top: 3rem;">
+                        <div class="creator-card" style="height: 300px; background: #21262d; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="image" style="width: 48px; height: 48px; color: var(--text-muted);"></i>
+                        </div>
+                        <div class="creator-card" style="height: 300px; background: #21262d; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="play" style="width: 48px; height: 48px; color: var(--text-muted);"></i>
+                        </div>
+                        <div class="creator-card" style="height: 300px; background: #21262d; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="mic" style="width: 48px; height: 48px; color: var(--text-muted);"></i>
+                        </div>
+                    </div>
+                </section>
+            `,
+            Community: `
+                <section class="section">
+                    <div class="section-title">
+                        <h2>StarHUB Community</h2>
+                        <p>Connect, collaborate, and grow together.</p>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 3rem; border-radius: 24px; margin-top: 3rem; text-align: center; border: 1px solid var(--border-color);">
+                        <i data-lucide="users" style="width: 64px; height: 64px; margin-bottom: 2rem; color: var(--accent-primary);"></i>
+                        <h3>Join the Discussion</h3>
+                        <p style="color: var(--text-secondary); margin: 1rem 0 2rem;">Access exclusive channels and member-only events.</p>
+                        <a href="#" class="btn btn-primary">Join Discord Server</a>
+                    </div>
+                </section>
+            `,
+            Marketplace: `
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Full Marketplace</h2>
+                            <p>Browse through hundreds of services and assets.</p>
+                        </div>
+                    </div>
+                    <div class="creators-grid">
+                        ${renderCreatorCard('PixelPerfect', 'Logo Designer', '$55.00', 'linear-gradient(45deg, #FF9A9E, #FAD0C4)')}
+                        ${renderCreatorCard('AuraGfx', 'Social Media Kits', '$35.00', 'linear-gradient(45deg, #A18CD1, #FBC2EB)')}
+                        ${renderCreatorCard('CodeCraft', 'Discord Bots', '$15.00', 'linear-gradient(45deg, #84FAB0, #8FD3F4)')}
+                        ${renderCreatorCard('CyberCloud', 'Hosting Services', '$9.99', 'linear-gradient(45deg, #00B4DB, #0083B0)')}
+                    </div>
+                </section>
+            `,
+            Ranking: `
+                <section class="section">
+                    <div class="section-title">
+                        <h2>Creator Rankings</h2>
+                        <p>The top performing creators this month.</p>
+                    </div>
+                    <div style="margin-top: 3rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden;">
+                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 80px 1fr 150px; background: var(--bg-tertiary); font-weight: 700;">
+                            <span>Rank</span>
+                            <span>Creator</span>
+                            <span>Score</span>
+                        </div>
+                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 80px 1fr 150px; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: gold;">#1</span>
+                            <span>Zypher_Design</span>
+                            <span>2,450 XP</span>
+                        </div>
+                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 80px 1fr 150px; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: silver;">#2</span>
+                            <span>NovaStreams</span>
+                            <span>1,820 XP</span>
+                        </div>
+                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 80px 1fr 150px;">
+                            <span style="color: #cd7f32;">#3</span>
+                            <span>EliteEdits</span>
+                            <span>1,540 XP</span>
+                        </div>
+                    </div>
+                </section>
+            `,
+            Coaching: `
+                <section class="section">
+                    <div class="section-title">
+                        <h2>Personal Coaching</h2>
+                        <p>Learn from the best in the industry.</p>
+                    </div>
+                    <div class="creators-grid" style="margin-top: 3rem;">
+                        <div class="creator-card">
+                            <h3>1-on-1 Branding</h3>
+                            <p style="color: var(--text-secondary); margin: 1rem 0;">Master the art of visual identity with Zypher.</p>
+                            <div class="price">$120 <span>/ hour</span></div>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Book Session</button>
+                        </div>
+                    </div>
+                </section>
+            `,
+            Dashboard: `
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>User Dashboard</h2>
+                            <p>Manage your account, orders, and services.</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                        <div class="creator-card" style="text-align: center;">
+                            <i data-lucide="wallet" style="color: var(--accent-primary); width: 32px; margin-bottom: 1rem;"></i>
+                            <h3 style="font-size: 1.5rem;">$245.00</h3>
+                            <p style="color: var(--text-secondary);">Balance</p>
+                        </div>
+                        <div class="creator-card" style="text-align: center;">
+                            <i data-lucide="shopping-bag" style="color: var(--accent-primary); width: 32px; margin-bottom: 1rem;"></i>
+                            <h3 style="font-size: 1.5rem;">12</h3>
+                            <p style="color: var(--text-secondary);">Active Orders</p>
+                        </div>
+                        <div class="creator-card" style="text-align: center;">
+                            <i data-lucide="star" style="color: var(--accent-primary); width: 32px; margin-bottom: 1rem;"></i>
+                            <h3 style="font-size: 1.5rem;">4.9</h3>
+                            <p style="color: var(--text-secondary);">Your Rating</p>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem;">
+                        <h3 style="margin-bottom: 1.5rem;">Recent Activity</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; padding: 1rem; background: var(--bg-tertiary); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span>Order #2951 - Branding Package</span>
+                                <span style="color: var(--accent-primary);">In Progress</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 1rem; background: var(--bg-tertiary); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span>Withdrawal Successful</span>
+                                <span style="color: #2ecc71;">+$150.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `
+        };
+
+        function renderCreatorCard(name, service, price, bg) {
+            return `
+                <div class="creator-card animate">
+                    <div class="creator-header">
+                        <div class="creator-avatar" style="background: ${bg};"></div>
+                        <div class="creator-info">
+                            <h4>${name}</h4>
+                            <span>${service}</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Professional high-end services for modern creators.</p>
+                    <div class="creator-footer">
+                        <div class="price">${price} <span>/ initial</span></div>
+                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="viewProfile('${name}')">View Profile</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderView(viewName) {
+            const content = document.getElementById('mainContent');
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                content.innerHTML = views[viewName] || `<h2>Section ${viewName} coming soon</h2>`;
+                content.style.opacity = '1';
+                content.style.transform = 'translateY(0)';
+                lucide.createIcons();
+                initAnimations();
+            }, 300);
+        }
+
+        function viewProfile(name) {
+            openModal(`
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="width: 80px; height: 80px; background: var(--accent-primary); border-radius: 20px; margin: 0 auto 1.5rem;"></div>
+                    <h2 style="font-family: var(--font-montserrat); margin-bottom: 0.5rem;">${name}</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Professional Creator & Designer</p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 2rem;" onclick="closeModal()">Hire Now</button>
+                </div>
+            `);
+        }
+
+        function initAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+        }
+
+        function updateNav(el, viewName) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            renderView(viewName);
+        }
+
+        // Handle Login Simulation
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('code')) {
+                showToast('Successfully logged in with Discord!', 'success');
+                renderView('Dashboard');
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Update Login button to Logout or Dashboard
+                const loginBtn = document.getElementById('loginBtn');
+                loginBtn.innerHTML = '<i data-lucide="user" style="width: 18px; margin-right: 8px;"></i> My Dashboard';
+                loginBtn.href = "#";
+                loginBtn.onclick = (e) => { e.preventDefault(); renderView('Dashboard'); };
+                lucide.createIcons();
+            } else {
+                renderView('Home');
+            }
+        });
     </script>
 </body>
 </html>
