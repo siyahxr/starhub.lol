@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Build Your Creator Identity</title>
+    <meta name="description" content="StarHUB is the ultimate platform for creators to build their identity, connect with the community, and stand out.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i data-lucide="star" style="color: white; fill: white;"></i>
+            </div>
+            <span class="logo-text">StarHUB</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="#" class="nav-item active">
+                <i data-lucide="home"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="video"></i>
+                <span>Media</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="users"></i>
+                <span>Community</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="shopping-cart"></i>
+                <span>Marketplace</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="trophy"></i>
+                <span>Ranking</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i data-lucide="graduation-cap"></i>
+                <span>Coaching</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="discord-widget">
+                <div class="status-indicator"></div>
+                <div class="discord-info">
+                    <p style="font-size: 0.8rem; font-weight: 600;">Join Discord</p>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);">2,451 Online</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="search-bar">
+                <i data-lucide="search" style="color: var(--text-muted); width: 18px;"></i>
+                <input type="text" placeholder="Explore marketplace...">
+            </div>
+
+            <div class="topbar-actions">
+                <a href="#" class="btn btn-ghost">Get Started</a>
+                <a href="#" class="btn btn-primary">Login with Discord</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-glow" style="top: -100px; right: -100px;"></div>
+            <div class="hero-glow" style="bottom: -100px; left: -100px; opacity: 0.4;"></div>
+            
+            <div class="hero-content">
+                <p class="hero-tagline animate">Designed to Stand Out</p>
+                <h1 class="hero-title animate">Build your creator <br><span>identity.</span></h1>
+                <p class="hero-description animate">StarHUB is a all-in-one ecosystem for creators, businesses and brands. <br>Design, grow, and monetize your influence with ease.</p>
+                
+                <div class="hero-actions animate">
+                    <a href="#" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">Explore Marketplace</a>
+                </div>
+
+                <div class="stats-grid animate">
+                    <div class="stat-item">
+                        <h3>14.5k+</h3>
+                        <p>Verified Creators</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>2,840</h3>
+                        <p>Active Workflows</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>98%</h3>
+                        <p>Satisfaction Rate</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Marketplace Section -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>Featured Creators</h2>
+                    <p>Hand-picked talent from our global community.</p>
+                </div>
+                <div class="section-actions">
+                    <a href="#" class="btn btn-ghost">View All <i data-lucide="chevron-right" style="width: 16px; display: inline; vertical-align: middle;"></i></a>
+                </div>
+            </div>
+
+            <div class="creators-grid" id="creators-container">
+                <!-- Creator Card 1 -->
+                <div class="creator-card animate">
+                    <div class="creator-header">
+                        <div class="creator-avatar" style="background: linear-gradient(45deg, #7c4dff, #ff4081);"></div>
+                        <div class="creator-info">
+                            <h4>Zypher_Design</h4>
+                            <span>UI/UX & Branding</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">I create high-end visual identities for esports teams and individual creators.</p>
+                    <div class="creator-tags">
+                        <span class="tag">Branding</span>
+                        <span class="tag">Gaming</span>
+                        <span class="tag">3D Art</span>
+                    </div>
+                    <div class="creator-footer">
+                        <div class="price">$45.00 <span>/ initial</span></div>
+                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
+                    </div>
+                </div>
+
+                <!-- Creator Card 2 -->
+                <div class="creator-card animate">
+                    <div class="creator-header">
+                        <div class="creator-avatar" style="background: linear-gradient(45deg, #00d2ff, #3a7bd5);"></div>
+                        <div class="creator-info">
+                            <h4>NovaStreams</h4>
+                            <span>Stream Management</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Optimizing your stream performance and engagement through advanced tools.</p>
+                    <div class="creator-tags">
+                        <span class="tag">Streaming</span>
+                        <span class="tag">Automation</span>
+                    </div>
+                    <div class="creator-footer">
+                        <div class="price">$29.00 <span>/ month</span></div>
+                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
+                    </div>
+                </div>
+
+                <!-- Creator Card 3 -->
+                <div class="creator-card animate">
+                    <div class="creator-header">
+                        <div class="creator-avatar" style="background: linear-gradient(45deg, #f8ff00, #3ad59f);"></div>
+                        <div class="creator-info">
+                            <h4>EliteEdits</h4>
+                            <span>Video Production</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Cinematic video editing and montage creation for professional gamers.</p>
+                    <div class="creator-tags">
+                        <span class="tag">Video Editing</span>
+                        <span class="tag">Cinema 4D</span>
+                    </div>
+                    <div class="creator-footer">
+                        <div class="price">$75.00 <span>/ project</span></div>
+                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View Profile</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="section" style="border-top: 1px solid var(--border-color); margin-top: 4rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div class="logo-container" style="margin-bottom: 0;">
+                    <div class="logo-icon">
+                        <i data-lucide="star" style="color: white; fill: white;"></i>
+                    </div>
+                    <span class="logo-text">StarHUB</span>
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+                    <a href="#" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+                    <a href="#" style="color: var(--text-muted); text-decoration: none;">Contact Us</a>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">&copy; 2026 StarHUB. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Script -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Simple Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add CSS for visibility
+        const style = document.createElement('style');
+        style.textContent = `
+            .animate { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
+            .animate.visible { opacity: 1; transform: translateY(0); }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
