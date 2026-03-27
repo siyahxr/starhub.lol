@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Güvenli Giriş</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="login-body-enhanced">
+    <div class="stars"></div>
+    <div class="premium-bg"></div>
+    <div class="vignette"></div>
+
+    <main class="login-container">
+        <div class="brand">
+            <img src="logo.png" alt="StarHUB" class="brand-logo">
+            <h1 class="brand-title">StarHUB</h1>
+        </div>
+
+        <div class="auth-card-premium">
+            <div class="auth-header">
+                <h2>Oturum Aç</h2>
+                <p>Discord veya Riot hesabınla bağlanarak dashboard'a eriş.</p>
+            </div>
+
+            <div class="auth-body">
+                <a href="https://discord.com/oauth2/authorize?client_id=1486756004883595284&response_type=code&redirect_uri=https%3A%2F%2Fstarhub.lol%2Fdashboard.html&scope=identify+guilds.join+email" class="discord-auth-btn">
+                    <img src="https://assets-global.website-files.com/6257adef93467e4228800e00/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Discord" class="discord-logo-icon">
+                    <span class="auth-text">DISCORD İLE BAĞLAN</span>
+                </a>
+
+                <div class="auth-separator">
+                    <span>YA DA</span>
+                </div>
+
+                <a href="dashboard.html" class="riot-auth-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Riot_Games_logo.svg" alt="Riot" class="riot-logo-icon">
+                    <span class="auth-text">RIOT GAMES İLE BAĞLAN</span>
+                    <div class="hover-glow"></div>
+                </a>
+            </div>
+
+            <div class="auth-footer-detailed">
+                <div class="secure-label">
+                    <span class="lock-icon">🔒</span>
+                    <span class="lock-text">END-TO-END ENCRYPTED AUTH</span>
+                </div>
+                <div class="legal-footer-links">
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Şartlar</a>
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-home-btn">← Ana Sayfaya Dön</a>
+    </main>
+
+    <script>
+        // Star generation
+        const starsContainer = document.querySelector('.stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+</html>

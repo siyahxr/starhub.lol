@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="dashboard-body">
+    <div class="stars"></div>
+    <div class="premium-bg"></div>
+    <div class="vignette"></div>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="StarHUB">
+            <span>StarHUB</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active">👤 Profil</a>
+            <a href="#" class="nav-item">🛡️ Rank Sync</a>
+            <a href="#" class="nav-item">📈 İstatistikler</a>
+            <a href="#" class="nav-item">⚔️ Takım Bul</a>
+            <a href="#" class="nav-item">⚙️ Ayarlar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="index.html" class="logout-btn">Güvenli Çıkış</a>
+        </div>
+    </aside>
+
+    <div class="dashboard-wrapper">
+        <header class="dash-top-nav">
+            <div class="dash-welcome">
+                <h1>Hoş geldin, <span class="user-highlight">Agent</span></h1>
+                <p>Profilini ve Valorant rankını buradan yönetebilirsin.</p>
+            </div>
+            <div class="user-pill">
+                <div class="pill-info">
+                    <span class="pill-name">siyah#0001</span>
+                    <span class="pill-status">Hızır</span>
+                </div>
+                <img src="logo.png" alt="User" class="pill-avatar">
+            </div>
+        </header>
+
+        <main class="dash-main-scroll">
+            <section class="dash-grid">
+                <!-- Profile Card -->
+                <div class="dash-card-xl profile-main">
+                    <div class="profile-banner"></div>
+                    <div class="profile-details-row">
+                        <div class="avatar-wrap">
+                            <img src="logo.png" alt="Main Avatar" class="dash-main-avatar">
+                        </div>
+                        <div class="profile-meta">
+                            <h2>siyah <span class="tag">#0001</span></h2>
+                            <p>Premium Creator & StarHUB Elite</p>
+                        </div>
+                        <button class="edit-profile-btn">Profili Düzenle</button>
+                    </div>
+                </div>
+
+                <!-- Rank Card -->
+                <div class="dash-card-l rank-card">
+                    <div class="card-header-row">
+                        <h3>VALORANT RANK DURUMU</h3>
+                        <span class="live-indicator">CANLI SYNC</span>
+                    </div>
+                    
+                    <div class="rank-content">
+                        <div class="rank-visual">
+                            <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img">
+                            <div class="rank-label">
+                                <span class="rank-tier">ASCENDANT 2</span>
+                                <span class="rank-rr">78 RR</span>
+                            </div>
+                        </div>
+                        <div class="rank-actions">
+                            <button class="sync-now-btn">ŞİMDİ SENKRONİZE ET</button>
+                            <p class="last-sync">Son Güncelleme: 5 Dakika Önce</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings & Toggles -->
+                <div class="dash-card-l settings-panel">
+                    <h3>HIZLI AYARLAR</h3>
+                    <div class="toggle-list">
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <span>Otomatik Rank Sync</span>
+                                <p>Rank atladığında Discord rolün oto güncellenir.</p>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <span>Profilim Herkese Açık</span>
+                                <p>Sitedeki aramalarda profilin görünür.</p>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <span>Market Bildirimleri</span>
+                                <p>Mağazadaki indirimli skinleri DM'den atar.</p>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <button class="save-dash-btn">AYARLARI KAYDET</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Stars
+        const starsContainer = document.querySelector('.stars');
+        for (let i = 0; i < 120; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarHUB | Elite Creator Identity</title>
-    <meta name="description" content="StarHUB is the ultimate ecosystem for creators and brands.">
+    <title>StarHUB | Elite Valorant Community</title>
+    <!-- SEO -->
+    <meta name="description" content="StarHUB is the ultimate ecosystem for Valorant players. Sync your rank, find teammates, and build your identity.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,33 +15,97 @@
     <link rel="icon" type="image/png" href="logo.png">
 </head>
 <body>
+    <!-- Premium Backdrop -->
     <div class="stars"></div>
-    <div class="glow"></div>
+    <div class="premium-bg"></div>
+    <div class="vignette"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="logo.png" alt="StarHUB" class="nav-icon">
+            <span>StarHUB</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Özellikler</a>
+            <a href="#faq">SSS</a>
+            <a href="login.html" class="nav-btn">Giriş Yap</a>
+        </div>
+    </nav>
     
-    <main class="container">
-        <div class="content">
-            <div class="logo-wrapper">
-                <img src="logo.png" alt="StarHUB" class="logo">
-                <h1 class="title">StarHUB</h1>
-            </div>
+    <main class="hero">
+        <div class="hero-content">
+            <div class="badge-new">NEW: RIOT GAMES SYNC READY</div>
+            <h1 class="main-title">VALORANT KİMLİĞİNİ <br><span class="highlight">GÜNCELLE</span></h1>
+            <p class="hero-desc">
+                Riot Games ve Discord hesabını StarHUB ekosistemine bağlayarak 
+                profesyonel oyuncu kimliğini yarat ve sunucu avantajlarını elde et.
+            </p>
             
-            <a href="https://discord.gg/starhub" class="discord-btn">
-                <span>Discord'a Katıl</span>
-                <div class="btn-glow"></div>
-            </a>
+            <div class="actions">
+                <a href="login.html" class="primary-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Riot_Games_logo.svg" alt="Riot" class="riot-mini">
+                    <span>Hemen Bağlan</span>
+                </a>
+                <a href="https://discord.gg/starhub" class="secondary-btn">
+                    <span>Discord'a Katıl</span>
+                </a>
+            </div>
+            <div class="onboarding-steps">
+                <span>01. Bağlan → </span>
+                <span>02. Senkronize Et → </span>
+                <span>03. Rolünü Al!</span>
+            </div>
         </div>
     </main>
 
+    <section id="features" class="features-section">
+        <div class="section-header">
+            <h2>Neden StarHUB?</h2>
+            <p>Sizler için en iyi sistemleri bir araya getirdik.</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="f-icon">🛡️</div>
+                <h3>Güvenli Doğrulama</h3>
+                <p>Riot Games OAuth 2.0 altyapısı ile şifrenizi paylaşmadan güvenli giriş yapın.</p>
+            </div>
+            <div class="feature-card highlight-card">
+                <div class="f-icon">🔄</div>
+                <h3>Otomatik Rank Sync</h3>
+                <p>Rank atladığınızda Discord rolleriniz tek tıkla veya otomatik güncellenir.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon">📊</div>
+                <h3>Dinamik İstatistikler</h3>
+                <p>Profilinizde maç geçmişiniz ve favori ajanlarınız sergilenir.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2026 StarHUB. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+                <a href="#">Riot Games Support</a>
+            </div>
+        </div>
+        <p class="riot-disclaimer">
+            StarHUB is not endorsed by Riot Games and doesn't reflect the views of Riot Games or anyone officially involved in producing or managing Riot Games properties.
+        </p>
+    </footer>
+
     <script>
-        // Simple star field generation for background depth
+        // Star generation
         const starsContainer = document.querySelector('.stars');
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 150; i++) {
             const star = document.createElement('div');
             star.className = 'star';
             star.style.left = `${Math.random() * 100}%`;
             star.style.top = `${Math.random() * 100}%`;
             star.style.animationDelay = `${Math.random() * 5}s`;
-            star.style.opacity = Math.random();
             starsContainer.appendChild(star);
         }
     </script>
