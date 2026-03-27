@@ -133,6 +133,10 @@
             <a href="#" class="nav-item" data-tab="stats">📈 İstatistikler</a>
             <a href="#" class="nav-item" data-tab="team">⚔️ Takım Bul</a>
             <a href="#" class="nav-item" data-tab="settings">⚙️ Ayarlar</a>
+            <!-- Admin Butonu (Gizli) -->
+            <a href="/admin" id="adminSidebarBtn" class="nav-item" style="display: none; border-left: 3px solid #FF4655;">
+                <span style="color: #FF4655;">🛡️ Admin Panel</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="#" class="logout-btn" id="logoutBtn">🚪 Güvenli Çıkış</a>
@@ -457,6 +461,17 @@
             if (res.ok) {
                 const profile = await res.json();
                 applyProfile(profile);
+
+                // Admin Kontrolü
+                if (['syh', 'winse'].includes(profile.slug)) {
+                    const adminBtn = document.getElementById('adminSidebarBtn');
+                    if (adminBtn) {
+                        adminBtn.style.display = 'flex';
+                        adminBtn.addEventListener('click', () => {
+                            window.location.href = '/admin';
+                        });
+                    }
+                }
             }
         } catch (e) { console.error('Profil yüklenemedi:', e); }
     }
