@@ -4,11 +4,14 @@ export async function onRequest(context) {
         return new Response("Method not allowed", { status: 405 });
     }
 
+    if (!env || !env.DB) {
+        return new Response(JSON.stringify({ error: "DB binding missing" }), { status: 500 });
+    }
+
     try {
         const body = await request.json();
         const { username, short_desc, avatar, banner } = body;
 
-        // Insert or update user
         await env.DB.prepare(`
             INSERT INTO users (username, short_desc, avatar, banner) 
             VALUES (?1, ?2, ?3, ?4)
