@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Giriş Yap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/png" href="/logo.png">
+</head>
+<body class="login-body-enhanced">
+    <div class="stars"></div>
+    <div class="premium-bg"></div>
+    <div class="vignette"></div>
+
+    <main class="login-container">
+        <div class="brand">
+            <img src="/logo.png" alt="StarHUB" class="brand-logo">
+            <h1 class="brand-title">StarHUB</h1>
+        </div>
+
+        <div class="auth-card-premium">
+            <div class="auth-header">
+                <h2>Oturum Aç</h2>
+                <p>Discord hesabınla bağlanarak dashboard'a eriş.</p>
+            </div>
+
+            <div class="auth-body">
+                <!-- Discord OAuth Butonu -->
+                <a href="https://discord.com/oauth2/authorize?client_id=1486756004883595284&response_type=code&redirect_uri=https%3A%2F%2Fstarhub.lol%2Fauth%2Fcallback&scope=identify+guilds.join+email"
+                   class="discord-auth-btn">
+                    <img src="https://assets-global.website-files.com/6257adef93467e4228800e00/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png"
+                         alt="Discord" class="discord-logo-icon">
+                    <span class="auth-text">DISCORD İLE GİRİŞ YAP</span>
+                </a>
+            </div>
+
+            <!-- Hata mesajı (URL'den gelen) -->
+            <div id="errorMsg" style="display:none; color:#FF4655; text-align:center; font-size:0.9rem; font-weight:700; margin-top:1rem;"></div>
+
+            <div class="auth-footer-detailed">
+                <div class="secure-label">
+                    <span class="lock-icon">🔒</span>
+                    <span class="lock-text">DISCORD OAuth2 — Güvenli Bağlantı</span>
+                </div>
+                <div class="legal-footer-links">
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Şartlar</a>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="back-home-btn">← Ana Sayfaya Dön</a>
+    </main>
+
+    <script>
+        // Yıldızlar
+        const starsContainer = document.querySelector('.stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
+
+        // Hata mesajı göster
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get('error');
+        if (error) {
+            const messages = {
+                'cancelled':    'Discord girişi iptal edildi.',
+                'auth_failed':  'Kimlik doğrulama başarısız. Tekrar dene.',
+                'user_failed':  'Kullanıcı bilgileri alınamadı.',
+                'server_error': 'Sunucu hatası. Lütfen tekrar dene.',
+            };
+            const el = document.getElementById('errorMsg');
+            el.textContent = messages[error] || 'Bir hata oluştu.';
+            el.style.display = 'block';
+        }
+
+        // Zaten giriş yapılmışsa dashboard'a yönlendir
+        function getCookie(name) {
+            const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+            return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
+        }
+        const session = getCookie('shub_session');
+        if (session) {
+            window.location.href = '/dashboard.html';
+        }
+    </script>
+</body>
+</html>

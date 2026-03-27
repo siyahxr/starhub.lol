@@ -193,12 +193,19 @@ export async function onRequest(context) {
   // 3. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
-    '/', '/index.html', '/login.html', '/dashboard.html',
-    '/profile.html', '/style.css', '/logo.png', '/bg.png',
+    '/', '/index.html', '/login.html', '/login', '/dashboard.html',
+    '/dashboard', '/profile.html', '/style.css', '/logo.png', '/bg.png',
     '/riot.txt', '/schema.sql', '/favicon.ico',
   ];
 
   if (staticPaths.includes(pathname) || pathname.match(/\.[a-z0-9]+$/i)) {
+    // /login → login.html, /dashboard → dashboard.html
+    if (pathname === '/login') {
+      return env.ASSETS.fetch(new Request(new URL('/login.html', url).toString()));
+    }
+    if (pathname === '/dashboard') {
+      return env.ASSETS.fetch(new Request(new URL('/dashboard.html', url).toString()));
+    }
     return env.ASSETS.fetch(request);
   }
 
