@@ -401,11 +401,31 @@ input:checked + .slider:before { transform: translateX(24px); }
 .save-msg { font-size: 0.9rem; font-weight: 700; margin-top: 1rem; min-height: 1.5rem; }
 
 /* ─── Modal ──────────────────────────────────────────────────── */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
 .modal-overlay.open { display: flex; animation: fadeInUp 0.3s ease; }
-.modal-card { background: #0d1117; border: 1px solid var(--glass-border); border-radius: 30px; padding: 3rem; width: 100%; max-width: 500px; }
-.modal-card h2 { font-size: 1.8rem; margin-bottom: 2rem; }
-.modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+
+.modal-card {
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 30px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+}
+.modal-card h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 2.5rem; }
+.modal-actions { display: flex; gap: 1rem; margin-top: 2.5rem; }
+.modal-actions .sync-now-btn { flex: 2; }
+.modal-actions .save-dash-btn { flex: 1; border-color: rgba(255,255,255,0.15); }
 
 @media (max-width: 1200px) { .dash-grid { grid-template-columns: 1fr; } .dash-card-xl { grid-column: span 1; } }
 @media (max-width: 900px) { .sidebar { display: none; } .dashboard-wrapper { margin-left: 0; padding: 2rem; } }

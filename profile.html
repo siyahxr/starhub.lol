@@ -3,95 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>__USERNAME__ | StarHUB</title>
-    <meta name="description" content="__BIO__ — StarHUB Profili">
-    <meta property="og:title" content="__USERNAME__ | StarHUB">
-    <meta property="og:description" content="__BIO__">
-    <meta property="og:image" content="__AVATAR_URL__">
+    <title>Profil | StarHUB</title>
+    <meta name="description" content="StarHUB Elite Oyuncu Profili">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
     <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        /* Critical inline styles for profile page */
+        .profile-page-wrap {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+        .profile-topbar {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 1.5rem;
+        }
+        .ptb-logo {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: #fff;
+            font-weight: 900; font-size: 1.1rem; letter-spacing: 1px;
+        }
+        .ptb-logo img { width: 32px; }
+        .ptb-btn {
+            background: #FF4655; color: #fff;
+            padding: 0.65rem 1.5rem; border-radius: 50px;
+            text-decoration: none; font-weight: 800;
+            font-size: 0.85rem; transition: 0.3s;
+        }
+        .ptb-btn:hover { transform: scale(1.05); background: #e63e4b; }
+
+        .profile-card-outer {
+            width: 100%; max-width: 860px;
+            padding: 0 1.5rem 4rem;
+        }
+        .pc-wrap {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(50px);
+            border-radius: 32px;
+            overflow: hidden;
+            animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pc-banner {
+            width: 100%; height: 220px;
+            background: linear-gradient(135deg, #1a0508 0%, #2c0f14 50%, #0a0a1a 100%);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .pc-banner::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+        }
+        .pc-body { padding: 0 2.5rem 2.5rem; }
+        .pc-top-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-top: -55px;
+            margin-bottom: 1.5rem;
+        }
+        .pc-avatar-box { position: relative; }
+        .pc-avatar {
+            width: 110px; height: 110px;
+            border-radius: 24px;
+            border: 5px solid #080a0c;
+            background: #080a0c;
+            object-fit: cover;
+        }
+        .pc-online {
+            position: absolute; bottom: 6px; right: -4px;
+            width: 16px; height: 16px;
+            background: #2ecc71; border-radius: 50%;
+            border: 3px solid #080a0c;
+        }
+        .pc-badges { display: flex; gap: 0.6rem; padding-bottom: 0.5rem; }
+        .pc-badge {
+            background: rgba(255,70,85,0.12);
+            color: #FF4655;
+            border: 1px solid rgba(255,70,85,0.25);
+            padding: 0.35rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .pc-badge.verified { background: rgba(88,101,242,0.12); color: #5865F2; border-color: rgba(88,101,242,0.25); }
+
+        .pc-name-row { margin-bottom: 0.6rem; }
+        .pc-name {
+            font-size: 2rem; font-weight: 900;
+            display: flex; align-items: center; gap: 0.8rem;
+        }
+        .pc-disc { color: rgba(255,255,255,0.3); font-size: 1.2rem; }
+        .pc-bio { color: rgba(255,255,255,0.55); font-size: 1rem; line-height: 1.5; margin-bottom: 0.8rem; }
+        .pc-slug-link { font-size: 0.8rem; color: #FF4655; font-weight: 700; text-decoration: none; }
+        .pc-slug-link:hover { text-decoration: underline; }
+
+        .pc-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 2rem 0; }
+
+        .pc-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr;
+            gap: 0;
+        }
+        .pc-stat { text-align: center; padding: 1.5rem; }
+        .pc-stat-sep { background: rgba(255,255,255,0.06); }
+        .pc-stat-label {
+            font-size: 0.65rem; letter-spacing: 2.5px;
+            color: rgba(255,255,255,0.35); font-weight: 900;
+            text-transform: uppercase; margin-bottom: 1rem;
+        }
+        .pc-rank-row { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+        .pc-rank-img { width: 55px; }
+        .pc-rank-name { font-size: 1.4rem; font-weight: 900; }
+        .pc-rank-rr { font-size: 0.9rem; color: #FF4655; font-weight: 800; }
+        .pc-platform-name { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+        .pc-platform-sub { font-size: 0.85rem; color: #2ecc71; font-weight: 700; }
+
+        .pc-footer-row {
+            display: flex; gap: 1rem;
+            margin-top: 2.5rem;
+        }
+        .pc-footer-btn {
+            flex: 1; text-align: center;
+            padding: 1rem; border-radius: 14px;
+            text-decoration: none; font-weight: 800;
+            font-size: 0.9rem; transition: 0.35s;
+        }
+        .pc-footer-btn.blurple { background: #5865F2; color: #fff; }
+        .pc-footer-btn.blurple:hover { background: #4752c4; box-shadow: 0 10px 30px rgba(88,101,242,0.3); }
+        .pc-footer-btn.ghost { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; }
+        .pc-footer-btn.ghost:hover { border-color: #fff; }
+
+        @media (max-width: 680px) {
+            .pc-top-row { flex-direction: column; align-items: flex-start; gap: 1rem; margin-top: -40px; }
+            .pc-name { font-size: 1.5rem; }
+            .pc-stats-row { grid-template-columns: 1fr; }
+            .pc-stat-sep { display: none; }
+            .pc-body { padding: 0 1.5rem 2rem; }
+        }
+
+        /* NOT FOUND STATE */
+        .nf-state {
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+        .nf-state h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .nf-state p { color: rgba(255,255,255,0.4); margin-bottom: 2rem; }
+        .nf-btn {
+            display: inline-block;
+            background: #FF4655; color: #fff;
+            padding: 1rem 2.5rem; border-radius: 14px;
+            text-decoration: none; font-weight: 800; transition: 0.3s;
+        }
+    </style>
 </head>
-<body class="profile-body">
+<body style="background:#080a0c; color:#fff; font-family:'Outfit',sans-serif;">
     <div class="stars"></div>
     <div class="premium-bg"></div>
     <div class="vignette"></div>
 
-    <!-- Nav -->
-    <nav class="profile-nav">
-        <a href="/" class="profile-nav-logo">
-            <img src="/logo.png" alt="StarHUB">
-            <span>StarHUB</span>
-        </a>
-        <a href="/login.html" class="nav-join-btn">Profilini Oluştur →</a>
-    </nav>
+    <div class="profile-page-wrap">
+        <div class="profile-topbar">
+            <a href="/" class="ptb-logo">
+                <img src="/logo.png" alt="StarHUB">
+                StarHUB
+            </a>
+            <a href="/login.html" class="ptb-btn">Profilini Oluştur →</a>
+        </div>
 
-    <main class="profile-main-zone">
-        <!-- ID Card -->
-        <div class="id-card">
-            <!-- Banner -->
-            <div class="id-banner" id="idBanner" style="background-image: url('__BANNER_URL__')"></div>
-
-            <!-- Avatar + Temel Bilgiler -->
-            <div class="id-core">
-                <div class="id-avatar-wrap">
-                    <img src="__AVATAR_URL__" alt="__USERNAME__" class="id-avatar" id="idAvatar">
-                    <div class="id-online-dot"></div>
+        <div class="profile-card-outer" id="profileContent">
+            <!-- JS ile doldurulacak -->
+            <div class="pc-wrap">
+                <div class="nf-state">
+                    <h2>⏳ Yükleniyor...</h2>
+                    <p>Profil bilgileri getiriliyor.</p>
                 </div>
-                <div class="id-info">
-                    <h1 class="id-name">__USERNAME__ <span class="id-badge">✦ ELITE</span></h1>
-                    <p class="id-bio">__BIO__</p>
-                    <span class="id-tag">starhub.lol/__SLUG__</span>
-                </div>
-            </div>
-
-            <!-- Stats Row -->
-            <div class="id-stats">
-                <div class="id-stat">
-                    <span class="id-stat-label">VALORANT RANK</span>
-                    <div class="id-rank-row">
-                        <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="id-rank-icon" id="idRankImg">
-                        <div>
-                            <span class="id-stat-value" id="idRankName">__RANK_NAME__</span>
-                            <span class="id-stat-sub" id="idRankRR">__RANK_RR__ RR</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="id-divider"></div>
-                <div class="id-stat">
-                    <span class="id-stat-label">PLATFORM</span>
-                    <span class="id-stat-value">StarHUB</span>
-                    <span class="id-stat-sub">Discord Doğrulandı</span>
-                </div>
-            </div>
-
-            <!-- Action -->
-            <div class="id-footer">
-                <a href="https://discord.gg/starhub" class="id-discord-btn">Discord'a Katıl</a>
-                <a href="/login.html" class="id-create-btn">Kendi Profilini Oluştur</a>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
         // Stars
-        const starsContainer = document.querySelector('.stars');
+        const starsEl = document.querySelector('.stars');
         for (let i = 0; i < 80; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.animationDelay = `${Math.random() * 5}s`;
-            starsContainer.appendChild(star);
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.left = `${Math.random() * 100}%`;
+            s.style.top = `${Math.random() * 100}%`;
+            s.style.animationDelay = `${Math.random() * 5}s`;
+            starsEl.appendChild(s);
         }
 
-        // Banner fallback
-        const banner = document.getElementById('idBanner');
-        if (!banner.style.backgroundImage || banner.style.backgroundImage === 'url("")') {
-            banner.style.background = 'linear-gradient(135deg, #1a0a0e 0%, #2c0f14 50%, #1a0a0e 100%)';
+        // URL'den slug'ı al (örn: starhub.lol/siyah → siyah)
+        const slug = window.location.pathname.replace('/', '').split('/')[0];
+
+        // Rank tier ID mapping (seviyeye göre)
+        const rankImages = {
+            'Iron': '3', 'Bronze': '6', 'Silver': '9', 'Gold': '12',
+            'Platinum': '15', 'Diamond': '18', 'Ascendant': '21',
+            'Immortal': '24', 'Radiant': '27', 'Unranked': '0'
+        };
+
+        function getRankImgUrl(rankName) {
+            const base = 'https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1';
+            const tier = Object.keys(rankImages).find(k => rankName && rankName.includes(k));
+            const num = tier ? rankImages[tier] : '0';
+            return `${base}/${num}/largeicon.png`;
         }
+
+        function renderProfile(p) {
+            const bannerStyle = p.banner_url
+                ? `background-image:url('${p.banner_url}'); background-size:cover; background-position:center;`
+                : '';
+            const avatarUrl = p.avatar_url || '/logo.png';
+            const rankImg = getRankImgUrl(p.rank_name);
+            const rankName = p.rank_name || 'Unranked';
+            const rankRR = p.rank_rr || 0;
+
+            document.getElementById('profileContent').innerHTML = `
+                <div class="pc-wrap">
+                    <div class="pc-banner" style="${bannerStyle}"></div>
+                    <div class="pc-body">
+                        <div class="pc-top-row">
+                            <div class="pc-avatar-box">
+                                <img src="${avatarUrl}" alt="${p.username}" class="pc-avatar" onerror="this.src='/logo.png'">
+                                <div class="pc-online"></div>
+                            </div>
+                            <div class="pc-badges">
+                                <span class="pc-badge">✦ ELITE</span>
+                                <span class="pc-badge verified">Discord ✓</span>
+                            </div>
+                        </div>
+
+                        <div class="pc-name-row">
+                            <h1 class="pc-name">${p.username}<span class="pc-disc">#${p.discriminator || '0000'}</span></h1>
+                        </div>
+                        <p class="pc-bio">${p.bio || 'StarHUB Elite Creator'}</p>
+                        <a href="/${p.slug}" class="pc-slug-link">starhub.lol/${p.slug}</a>
+
+                        <div class="pc-divider"></div>
+
+                        <div class="pc-stats-row">
+                            <div class="pc-stat">
+                                <div class="pc-stat-label">Valorant Rank</div>
+                                <div class="pc-rank-row">
+                                    <img src="${rankImg}" alt="${rankName}" class="pc-rank-img" onerror="this.style.display='none'">
+                                    <div>
+                                        <div class="pc-rank-name">${rankName}</div>
+                                        <div class="pc-rank-rr">${rankRR} RR</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pc-stat-sep"></div>
+                            <div class="pc-stat">
+                                <div class="pc-stat-label">Platform</div>
+                                <div class="pc-platform-name">StarHUB</div>
+                                <div class="pc-platform-sub">🔒 Discord Doğrulandı</div>
+                            </div>
+                        </div>
+
+                        <div class="pc-footer-row">
+                            <a href="https://discord.gg/starhub" class="pc-footer-btn blurple">Discord'a Katıl</a>
+                            <a href="/login.html" class="pc-footer-btn ghost">Kendi Profilini Oluştur</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.title = `${p.username} | StarHUB`;
+        }
+
+        function renderNotFound(slug) {
+            document.getElementById('profileContent').innerHTML = `
+                <div class="pc-wrap">
+                    <div class="nf-state">
+                        <h2>😶 Profil Bulunamadı</h2>
+                        <p><strong>${slug}</strong> adında bir kullanıcı henüz kayıtlı değil.</p>
+                        <a href="/login.html" class="nf-btn">Profilini Oluştur</a>
+                    </div>
+                </div>
+            `;
+            document.title = 'Profil Bulunamadı | StarHUB';
+        }
+
+        async function loadProfile() {
+            if (!slug || ['index', 'login', 'dashboard', 'profile', 'style', 'bg', 'logo', 'riot', 'schema'].includes(slug)) {
+                window.location.href = '/';
+                return;
+            }
+            try {
+                const res = await fetch(`/api/profile?slug=${encodeURIComponent(slug)}`);
+                if (res.ok) {
+                    const profile = await res.json();
+                    renderProfile(profile);
+                } else {
+                    renderNotFound(slug);
+                }
+            } catch (e) {
+                renderNotFound(slug);
+            }
+        }
+
+        loadProfile();
     </script>
 </body>
 </html>

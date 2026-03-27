@@ -9,11 +9,118 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        /* ─── Upload Area ───────────────────────────────────────── */
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: #FF4655;
+            background: rgba(255,70,85,0.05);
+        }
+        .upload-zone input[type="file"] {
+            position: absolute; inset: 0;
+            opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+        .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .upload-label { font-weight: 700; font-size: 0.9rem; color: #fff; }
+        .upload-sub { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 0.3rem; }
+
+        .preview-wrap { position: relative; margin-top: 1rem; }
+        .banner-preview {
+            width: 100%; height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .avatar-preview {
+            width: 80px; height: 80px;
+            border-radius: 18px;
+            object-fit: cover;
+            display: none;
+            border: 3px solid #FF4655;
+        }
+        .remove-preview-btn {
+            position: absolute; top: 6px; right: 6px;
+            background: rgba(0,0,0,0.7); border: none;
+            color: #fff; border-radius: 50%;
+            width: 24px; height: 24px; cursor: pointer;
+            font-size: 0.8rem; display: none;
+            align-items: center; justify-content: center;
+        }
+        .preview-wrap.has-preview .banner-preview,
+        .preview-wrap.has-preview .avatar-preview { display: block; }
+        .preview-wrap.has-preview .remove-preview-btn { display: flex; }
+
+        .upload-progress {
+            height: 3px; background: rgba(255,255,255,0.05);
+            border-radius: 3px; margin-top: 0.8rem; overflow: hidden; display: none;
+        }
+        .upload-progress-bar {
+            height: 100%; width: 0%; background: #FF4655;
+            transition: width 0.3s; border-radius: 3px;
+        }
+
+        /* ─── Auth Guard ─────────────────────────────────────────── */
+        .auth-guard {
+            position: fixed; inset: 0;
+            background: #080a0c;
+            z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 1.5rem; text-align: center;
+        }
+        .auth-guard img { width: 60px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:0.5;transform:scale(0.95)} 50%{opacity:1;transform:scale(1.05)} }
+        .auth-guard h2 { font-size: 1.5rem; }
+        .auth-guard p { color: rgba(255,255,255,0.4); font-size: 0.9rem; }
+        .auth-guard a {
+            background: #5865F2; color: #fff;
+            padding: 1rem 2.5rem; border-radius: 14px;
+            text-decoration: none; font-weight: 800; transition: 0.3s;
+        }
+        .auth-guard a:hover { background: #4752c4; }
+
+        /* ─── Toast ──────────────────────────────────────────────── */
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background: #0d1117; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 1rem 1.5rem;
+            font-weight: 700; font-size: 0.9rem;
+            transform: translateY(100px); opacity: 0;
+            transition: 0.4s cubic-bezier(0.16,1,0.3,1);
+            z-index: 999; max-width: 360px;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-left: 4px solid #2ecc71; }
+        .toast.error { border-left: 4px solid #FF4655; }
+    </style>
 </head>
 <body class="dashboard-body">
     <div class="stars"></div>
     <div class="premium-bg"></div>
     <div class="vignette"></div>
+
+    <!-- Auth Guard (oturum yoksa gösterilir) -->
+    <div class="auth-guard" id="authGuard" style="display:none">
+        <img src="logo.png" alt="StarHUB">
+        <h2>Oturum Açman Gerekiyor</h2>
+        <p>Dashboard'a erişmek için Discord hesabınla giriş yap.</p>
+        <a href="https://discord.com/oauth2/authorize?client_id=1486756004883595284&response_type=code&redirect_uri=https%3A%2F%2Fstarhub.lol%2Fdashboard.html&scope=identify+guilds.join+email">
+            Discord ile Giriş Yap
+        </a>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <aside class="sidebar">
         <div class="sidebar-logo">
@@ -28,14 +135,14 @@
             <a href="#" class="nav-item" data-tab="settings">⚙️ Ayarlar</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="index.html" class="logout-btn">🚪 Güvenli Çıkış</a>
+            <a href="#" class="logout-btn" id="logoutBtn">🚪 Güvenli Çıkış</a>
         </div>
     </aside>
 
     <div class="dashboard-wrapper">
         <header class="dash-top-nav">
             <div class="dash-welcome">
-                <h1>Hoş geldin, <span class="user-highlight" id="welcomeName">Agent</span></h1>
+                <h1>Hoş geldin, <span class="user-highlight" id="welcomeName">...</span></h1>
                 <p>Profilini ve Valorant rankını buradan yönetebilirsin.</p>
             </div>
             <div class="user-pill">
@@ -53,15 +160,15 @@
             <section class="tab-content active" id="tab-profile">
                 <div class="dash-grid">
                     <div class="dash-card-xl profile-main">
-                        <div class="profile-banner" id="profileBannerDisplay" style="background: linear-gradient(135deg, #1a0a0e, #2c0f14)"></div>
+                        <div class="profile-banner" id="profileBannerDisplay"></div>
                         <div class="profile-details-row">
                             <div class="avatar-wrap">
                                 <img src="logo.png" alt="Avatar" class="dash-main-avatar" id="mainAvatar">
                             </div>
                             <div class="profile-meta">
-                                <h2 id="displayName">siyah <span class="tag">#0001</span></h2>
+                                <h2 id="displayName">... <span class="tag">#0000</span></h2>
                                 <p id="displayBio">StarHUB Elite Creator</p>
-                                <p class="profile-link-text">🔗 <a href="#" id="publicProfileLink" class="public-link">starhub.lol/...</a></p>
+                                <p class="profile-link-text">🔗 <a href="#" id="publicProfileLink" class="public-link" target="_blank">starhub.lol/...</a></p>
                             </div>
                             <button class="edit-profile-btn" id="editProfileBtn">Profili Düzenle</button>
                         </div>
@@ -73,10 +180,10 @@
                             <span class="live-indicator">CANLI</span>
                         </div>
                         <div class="rank-visual">
-                            <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img" id="dashRankImg">
+                            <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/0/largeicon.png" alt="Rank" class="dash-rank-img" id="dashRankImg">
                             <div class="rank-label">
-                                <span class="rank-tier" id="dashRankName">ASCENDANT 2</span>
-                                <span class="rank-rr" id="dashRankRR">78 RR</span>
+                                <span class="rank-tier" id="dashRankName">Unranked</span>
+                                <span class="rank-rr" id="dashRankRR">0 RR</span>
                             </div>
                         </div>
                     </div>
@@ -110,14 +217,14 @@
                     <div class="dash-card-xl">
                         <div class="card-header-row">
                             <h3>VALORANT RANK SENKRONİZASYONU</h3>
-                            <span class="live-indicator">CANLI SYNC</span>
+                            <span class="live-indicator">CANLI</span>
                         </div>
                         <div class="rank-content">
-                            <div class="rank-visual">
-                                <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img">
+                            <div class="rank-visual" style="margin-bottom:2rem">
+                                <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/0/largeicon.png" class="dash-rank-img" id="syncRankImg">
                                 <div class="rank-label">
-                                    <span class="rank-tier" id="syncRankName">ASCENDANT 2</span>
-                                    <span class="rank-rr" id="syncRankRR">78 RR</span>
+                                    <span class="rank-tier" id="syncRankName">Unranked</span>
+                                    <span class="rank-rr" id="syncRankRR">0 RR</span>
                                 </div>
                             </div>
                             <button class="sync-now-btn" id="syncNowBtn">🔄 ŞİMDİ SENKRONİZE ET</button>
@@ -132,7 +239,7 @@
                 <div class="dash-grid">
                     <div class="dash-card-xl">
                         <h3>İSTATİSTİKLER</h3>
-                        <p style="color:var(--text-secondary); margin-top:1rem;">Valorant hesabı bağlandıktan sonra maç istatistiklerin burada görünecek.</p>
+                        <p style="color:var(--text-secondary);margin-top:1rem">Valorant hesabı bağlandıktan sonra maç istatistiklerin burada görünecek.</p>
                     </div>
                 </div>
             </section>
@@ -142,7 +249,7 @@
                 <div class="dash-grid">
                     <div class="dash-card-xl">
                         <h3>TAKIM BUL</h3>
-                        <p style="color:var(--text-secondary); margin-top:1rem;">Yakında — Discord sunucusundan /takımbul komutu ile şu an aktif!</p>
+                        <p style="color:var(--text-secondary);margin-top:1rem">Yakında — Discord sunucusundan /takımbul komutu şu an aktif!</p>
                     </div>
                 </div>
             </section>
@@ -153,21 +260,56 @@
                     <div class="dash-card-xl">
                         <h3>PROFİL AYARLARI</h3>
                         <div class="settings-form">
+
                             <div class="form-group">
-                                <label>Kullanıcı Adı (Profil Linki)</label>
+                                <label>PROFİL LİNKİ</label>
                                 <div class="slug-input-wrap">
                                     <span class="slug-prefix">starhub.lol/</span>
                                     <input type="text" id="slugInput" placeholder="kullanici-adin" class="dash-input">
                                 </div>
                             </div>
+
                             <div class="form-group">
-                                <label>Bio</label>
+                                <label>BIO</label>
                                 <textarea id="bioInput" class="dash-input" rows="3" placeholder="Kendinizi tanıtın..."></textarea>
                             </div>
+
+                            <!-- AVATAR UPLOAD -->
                             <div class="form-group">
-                                <label>Banner URL</label>
-                                <input type="text" id="bannerInput" class="dash-input" placeholder="https://...">
+                                <label>AVATAR FOTOĞRAFI</label>
+                                <div class="upload-zone" id="avatarZone">
+                                    <input type="file" id="avatarFile" accept="image/*">
+                                    <div class="upload-icon">🖼️</div>
+                                    <div class="upload-label">Tıkla veya sürükle-bırak</div>
+                                    <div class="upload-sub">PNG, JPG, GIF · Maks 32MB</div>
+                                </div>
+                                <div class="preview-wrap" id="avatarPreviewWrap">
+                                    <img class="avatar-preview" id="avatarPreview" alt="Avatar Önizleme">
+                                    <button class="remove-preview-btn" id="avatarRemoveBtn">✕</button>
+                                </div>
+                                <div class="upload-progress" id="avatarProgress">
+                                    <div class="upload-progress-bar" id="avatarProgressBar"></div>
+                                </div>
                             </div>
+
+                            <!-- BANNER UPLOAD -->
+                            <div class="form-group">
+                                <label>BANNER RESMİ</label>
+                                <div class="upload-zone" id="bannerZone">
+                                    <input type="file" id="bannerFile" accept="image/*">
+                                    <div class="upload-icon">🎨</div>
+                                    <div class="upload-label">Tıkla veya sürükle-bırak</div>
+                                    <div class="upload-sub">PNG, JPG, GIF · Maks 32MB</div>
+                                </div>
+                                <div class="preview-wrap" id="bannerPreviewWrap">
+                                    <img class="banner-preview" id="bannerPreview" alt="Banner Önizleme">
+                                    <button class="remove-preview-btn" id="bannerRemoveBtn">✕</button>
+                                </div>
+                                <div class="upload-progress" id="bannerProgress">
+                                    <div class="upload-progress-bar" id="bannerProgressBar"></div>
+                                </div>
+                            </div>
+
                             <button class="sync-now-btn" id="saveProfileBtn">💾 PROFİLİ KAYDET</button>
                             <p class="save-msg" id="saveMsg"></p>
                         </div>
@@ -182,20 +324,52 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
             <h2>Profili Düzenle</h2>
-            <div class="form-group">
-                <label>Profil Linki (Slug)</label>
-                <div class="slug-input-wrap">
-                    <span class="slug-prefix">starhub.lol/</span>
-                    <input type="text" id="modalSlug" class="dash-input" placeholder="kullanici-adin">
+            <div class="settings-form" style="margin-top:0">
+                <div class="form-group">
+                    <label>PROFİL LİNKİ</label>
+                    <div class="slug-input-wrap">
+                        <span class="slug-prefix">starhub.lol/</span>
+                        <input type="text" id="modalSlug" class="dash-input" placeholder="kullanici-adin">
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Bio</label>
-                <textarea id="modalBio" class="dash-input" rows="3" placeholder="Kendinizi tanıtın..."></textarea>
-            </div>
-            <div class="form-group">
-                <label>Banner Resim URL</label>
-                <input type="text" id="modalBanner" class="dash-input" placeholder="https://...">
+                <div class="form-group">
+                    <label>BIO</label>
+                    <textarea id="modalBio" class="dash-input" rows="3" placeholder="Kendinizi tanıtın..."></textarea>
+                </div>
+                <!-- Avatar Upload Modal -->
+                <div class="form-group">
+                    <label>AVATAR</label>
+                    <div class="upload-zone" id="modalAvatarZone">
+                        <input type="file" id="modalAvatarFile" accept="image/*">
+                        <div class="upload-icon">🖼️</div>
+                        <div class="upload-label">Tıkla veya sürükle-bırak</div>
+                        <div class="upload-sub">PNG, JPG, GIF</div>
+                    </div>
+                    <div class="preview-wrap" id="modalAvatarPreviewWrap" style="margin-top:0.8rem">
+                        <img class="avatar-preview" id="modalAvatarPreview" alt="Avatar">
+                        <button class="remove-preview-btn" id="modalAvatarRemoveBtn">✕</button>
+                    </div>
+                    <div class="upload-progress" id="modalAvatarProgress">
+                        <div class="upload-progress-bar" id="modalAvatarProgressBar"></div>
+                    </div>
+                </div>
+                <!-- Banner Upload Modal -->
+                <div class="form-group">
+                    <label>BANNER</label>
+                    <div class="upload-zone" id="modalBannerZone">
+                        <input type="file" id="modalBannerFile" accept="image/*">
+                        <div class="upload-icon">🎨</div>
+                        <div class="upload-label">Tıkla veya sürükle-bırak</div>
+                        <div class="upload-sub">PNG, JPG, GIF</div>
+                    </div>
+                    <div class="preview-wrap" id="modalBannerPreviewWrap" style="margin-top:0.8rem">
+                        <img class="banner-preview" id="modalBannerPreview" alt="Banner">
+                        <button class="remove-preview-btn" id="modalBannerRemoveBtn">✕</button>
+                    </div>
+                    <div class="upload-progress" id="modalBannerProgress">
+                        <div class="upload-progress-bar" id="modalBannerProgressBar"></div>
+                    </div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="sync-now-btn" id="modalSaveBtn">💾 KAYDET</button>
@@ -206,171 +380,326 @@
     </div>
 
     <script>
-        // ─── Star Generation ────────────────────────────────────────────────────
-        const starsEl = document.querySelector('.stars');
-        for (let i = 0; i < 120; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            s.style.left = `${Math.random() * 100}%`;
-            s.style.top = `${Math.random() * 100}%`;
-            s.style.animationDelay = `${Math.random() * 5}s`;
-            starsEl.appendChild(s);
+    // ════════════════════════════════════════════════════════
+    //  STARHUB DASHBOARD ENGINE
+    // ════════════════════════════════════════════════════════
+
+    // ImgBB API Key — https://api.imgbb.com adresinden ücretsiz al
+    // Cloudflare Pages ayarlarına IMGBB_KEY olarak da ekleyebilirsin
+    const IMGBB_API_KEY = '0b7bedc321c4875c130abf1c959daf13';
+
+    // ─── Yıldız Efekti ────────────────────────────────────────
+    const starsEl = document.querySelector('.stars');
+    for (let i = 0; i < 120; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.left = `${Math.random() * 100}%`;
+        s.style.top = `${Math.random() * 100}%`;
+        s.style.animationDelay = `${Math.random() * 5}s`;
+        starsEl.appendChild(s);
+    }
+
+    // ─── Toast Bildirimleri ───────────────────────────────────
+    function toast(msg, type = 'success') {
+        const el = document.getElementById('toast');
+        el.textContent = type === 'success' ? `✅ ${msg}` : `❌ ${msg}`;
+        el.className = `toast ${type} show`;
+        setTimeout(() => { el.className = 'toast'; }, 4000);
+    }
+
+    // ─── Cookie Okuma ─────────────────────────────────────────
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (match) return match[2];
+        return null;
+    }
+
+    function getSession() {
+        const cookie = getCookie('shub_session');
+        if (!cookie) return null;
+        try {
+            return JSON.parse(decodeURIComponent(escape(atob(cookie))));
+        } catch { return null; }
+    }
+
+    // ─── Oturum Kontrolü ──────────────────────────────────────
+    const session = getSession();
+    if (!session) {
+        document.getElementById('authGuard').style.display = 'flex';
+    } else {
+        initDashboard(session);
+    }
+
+    // ─── Dashboard Başlatma ───────────────────────────────────
+    async function initDashboard(user) {
+        // Temel UI güncelle
+        document.getElementById('welcomeName').textContent = user.username || 'Agent';
+        document.getElementById('pillName').textContent = user.username || 'Agent';
+        if (user.avatarUrl) {
+            document.getElementById('pillAvatar').src = user.avatarUrl;
+            document.getElementById('mainAvatar').src = user.avatarUrl;
         }
+        document.getElementById('displayName').innerHTML =
+            `${user.username || 'Agent'} <span class="tag">#${user.discriminator || '0'}</span>`;
 
-        // ─── Session (Discord OAuth'tan gelen code ile gelecekte değişecek) ──
-        // Şimdilik localStorage'dan okuyoruz
-        const user = JSON.parse(localStorage.getItem('shub_user') || '{}');
-        const userId = user.id || null;
-
-        if (userId) {
-            document.getElementById('welcomeName').textContent = user.username || 'Agent';
-            document.getElementById('pillName').textContent = user.username || 'Agent';
-            if (user.avatar) {
-                const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
-                document.getElementById('pillAvatar').src = avatarUrl;
-                document.getElementById('mainAvatar').src = avatarUrl;
+        // D1'den profil yükle
+        try {
+            const res = await fetch(`/api/profile?user_id=${user.id}`);
+            if (res.ok) {
+                const profile = await res.json();
+                applyProfile(profile);
             }
-            document.getElementById('displayName').innerHTML = `${user.username || 'Agent'} <span class="tag">#${user.discriminator || '0000'}</span>`;
+        } catch (e) { console.error('Profil yüklenemedi:', e); }
+    }
 
-            // Veritabanından profil yükle
-            loadProfile(userId);
+    function applyProfile(p) {
+        if (p.bio) {
+            document.getElementById('displayBio').textContent = p.bio;
+            document.getElementById('modalBio').value = p.bio;
+            document.getElementById('bioInput').value = p.bio;
         }
-
-        async function loadProfile(uid) {
-            try {
-                const res = await fetch(`/api/profile?user_id=${uid}`);
-                if (res.ok) {
-                    const profile = await res.json();
-                    applyProfile(profile);
-                }
-            } catch (e) { console.log('Profil yükleme hatası:', e); }
+        if (p.slug) {
+            const link = document.getElementById('publicProfileLink');
+            link.textContent = `starhub.lol/${p.slug}`;
+            link.href = `/${p.slug}`;
+            document.getElementById('modalSlug').value = p.slug;
+            document.getElementById('slugInput').value = p.slug;
         }
-
-        function applyProfile(profile) {
-            if (profile.bio) document.getElementById('displayBio').textContent = profile.bio;
-            if (profile.slug) {
-                document.getElementById('publicProfileLink').textContent = `starhub.lol/${profile.slug}`;
-                document.getElementById('publicProfileLink').href = `/${profile.slug}`;
-            }
-            if (profile.banner_url) {
-                document.getElementById('profileBannerDisplay').style.backgroundImage = `url('${profile.banner_url}')`;
-                document.getElementById('profileBannerDisplay').style.backgroundSize = 'cover';
-            }
-            if (profile.slug) document.getElementById('slugInput').value = profile.slug;
-            if (profile.bio) document.getElementById('bioInput').value = profile.bio;
-            if (profile.banner_url) document.getElementById('bannerInput').value = profile.banner_url;
-            if (profile.slug) { document.getElementById('modalSlug').value = profile.slug; }
-            if (profile.bio) { document.getElementById('modalBio').value = profile.bio; }
-            if (profile.banner_url) { document.getElementById('modalBanner').value = profile.banner_url; }
-            if (profile.sync_active !== undefined) document.getElementById('toggleSync').checked = !!profile.sync_active;
-            if (profile.is_public !== undefined) document.getElementById('togglePublic').checked = !!profile.is_public;
+        if (p.banner_url) {
+            document.getElementById('profileBannerDisplay').style.backgroundImage = `url('${p.banner_url}')`;
+            document.getElementById('profileBannerDisplay').style.backgroundSize = 'cover';
         }
-
-        async function saveProfile(slug, bio, bannerUrl) {
-            const body = {
-                user_id: userId || 'demo_user',
-                username: user.username || 'demo',
-                slug: slug || user.username || 'demo',
-                bio,
-                banner_url: bannerUrl,
-                avatar_url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : '/logo.png',
-                is_public: document.getElementById('togglePublic').checked ? 1 : 0,
-                sync_active: document.getElementById('toggleSync').checked ? 1 : 0
-            };
-
-            const res = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            return res.json();
+        if (p.avatar_url) {
+            document.getElementById('mainAvatar').src = p.avatar_url;
+            document.getElementById('pillAvatar').src = p.avatar_url;
         }
+        if (p.rank_name) {
+            document.getElementById('dashRankName').textContent = p.rank_name;
+            document.getElementById('syncRankName').textContent = p.rank_name;
+        }
+        if (p.rank_rr !== undefined) {
+            document.getElementById('dashRankRR').textContent = `${p.rank_rr} RR`;
+            document.getElementById('syncRankRR').textContent = `${p.rank_rr} RR`;
+        }
+        if (p.sync_active !== undefined) document.getElementById('toggleSync').checked = !!p.sync_active;
+        if (p.is_public !== undefined) document.getElementById('togglePublic').checked = !!p.is_public;
+    }
 
-        // ─── Tab Navigation ───────────────────────────────────────────────────
-        document.querySelectorAll('[data-tab]').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const tabId = item.dataset.tab;
+    // ─── ImgBB Yükleme ────────────────────────────────────────
+    async function uploadToImgBB(file, progressBarId, progressContainerId) {
+        if (IMGBB_API_KEY === 'YOUR_IMGBB_API_KEY') {
+            toast('ImgBB API Key eksik! Ayarlar sekmesine gir ve kodu güncelle.', 'error');
+            return null;
+        }
+        const container = document.getElementById(progressContainerId);
+        const bar = document.getElementById(progressBarId);
+        container.style.display = 'block';
+        bar.style.width = '20%';
 
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('key', IMGBB_API_KEY);
 
-                item.classList.add('active');
-                document.getElementById(`tab-${tabId}`).classList.add('active');
-            });
+        try {
+            bar.style.width = '60%';
+            const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+            bar.style.width = '100%';
+            const data = await res.json();
+            setTimeout(() => { container.style.display = 'none'; bar.style.width = '0%'; }, 800);
+            if (data.success) return data.data.url;
+            toast('Yükleme başarısız: ' + (data.error?.message || 'Bilinmeyen hata'), 'error');
+            return null;
+        } catch (e) {
+            container.style.display = 'none';
+            toast('Yükleme hatası: ' + e.message, 'error');
+            return null;
+        }
+    }
+
+    // ─── Yükleme Alanı Kurulum ────────────────────────────────
+    function setupUploadZone(fileInputId, previewImgId, previewWrapId, removeBtnId) {
+        const fileInput = document.getElementById(fileInputId);
+        const previewImg = document.getElementById(previewImgId);
+        const previewWrap = document.getElementById(previewWrapId);
+        const removeBtn = document.getElementById(removeBtnId);
+        const zone = fileInput.closest('.upload-zone');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            previewImg.src = url;
+            previewWrap.classList.add('has-preview');
         });
 
-        // ─── Ayarları Kaydet Butonu ───────────────────────────────────────────
-        document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveSettingsBtn');
-            btn.textContent = 'Kaydediliyor...';
-            btn.disabled = true;
-            const slug = document.getElementById('slugInput').value;
-            const bio = document.getElementById('bioInput').value;
-            const banner = document.getElementById('bannerInput').value;
-            const result = await saveProfile(slug, bio, banner);
-            btn.textContent = result.success ? '✅ KAYDEDİLDİ!' : '❌ HATA!';
-            setTimeout(() => { btn.textContent = 'AYARLARI KAYDET'; btn.disabled = false; }, 3000);
+        // Sürükle-bırak
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+            fileInput.files = e.dataTransfer.files;
+            const url = URL.createObjectURL(file);
+            previewImg.src = url;
+            previewWrap.classList.add('has-preview');
         });
 
-        // ─── Profili Kaydet (Ayarlar Tabı) ─────────────────────────────────
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveProfileBtn');
-            const slug = document.getElementById('slugInput').value;
-            const bio = document.getElementById('bioInput').value;
-            const banner = document.getElementById('bannerInput').value;
-            btn.textContent = 'Kaydediliyor...';
-            btn.disabled = true;
-            const result = await saveProfile(slug, bio, banner);
-            const msg = document.getElementById('saveMsg');
-            if (result.success) {
-                msg.textContent = `✅ Profil linkin: ${result.profileUrl}`;
-                msg.style.color = '#2ecc71';
-                document.getElementById('publicProfileLink').textContent = `starhub.lol/${slug}`;
-                document.getElementById('publicProfileLink').href = `/${slug}`;
-            } else {
-                msg.textContent = `❌ ${result.error}`;
-                msg.style.color = '#FF4655';
-            }
-            btn.textContent = '💾 PROFİLİ KAYDET';
-            btn.disabled = false;
+        removeBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            previewImg.src = '';
+            previewWrap.classList.remove('has-preview');
         });
+    }
 
-        // ─── Profili Düzenle Modal ────────────────────────────────────────────
-        document.getElementById('editProfileBtn').addEventListener('click', () => {
-            document.getElementById('editModal').classList.add('open');
+    // Upload alanlarını kur
+    setupUploadZone('avatarFile', 'avatarPreview', 'avatarPreviewWrap', 'avatarRemoveBtn');
+    setupUploadZone('bannerFile', 'bannerPreview', 'bannerPreviewWrap', 'bannerRemoveBtn');
+    setupUploadZone('modalAvatarFile', 'modalAvatarPreview', 'modalAvatarPreviewWrap', 'modalAvatarRemoveBtn');
+    setupUploadZone('modalBannerFile', 'modalBannerPreview', 'modalBannerPreviewWrap', 'modalBannerRemoveBtn');
+
+    // ─── Profil Kaydetme ──────────────────────────────────────
+    async function saveProfile({ slug, bio, avatarFile, bannerFile }) {
+        if (!session) return { error: 'Oturum yok' };
+
+        let avatarUrl = null;
+        let bannerUrl = null;
+
+        if (avatarFile) {
+            avatarUrl = await uploadToImgBB(avatarFile, 'avatarProgressBar', 'avatarProgress') ||
+                        await uploadToImgBB(avatarFile, 'modalAvatarProgressBar', 'modalAvatarProgress');
+        }
+        if (bannerFile) {
+            bannerUrl = await uploadToImgBB(bannerFile, 'bannerProgressBar', 'bannerProgress') ||
+                        await uploadToImgBB(bannerFile, 'modalBannerProgressBar', 'modalBannerProgress');
+        }
+
+        const body = {
+            user_id: session.id,
+            username: session.username,
+            slug: slug || session.username.toLowerCase().replace(/[^a-z0-9_-]/g, ''),
+            bio: bio || '',
+            avatar_url: avatarUrl || session.avatarUrl || '',
+            banner_url: bannerUrl || '',
+            is_public: document.getElementById('togglePublic').checked ? 1 : 0,
+            sync_active: document.getElementById('toggleSync').checked ? 1 : 0,
+        };
+
+        const res = await fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
         });
-        document.getElementById('modalCancelBtn').addEventListener('click', () => {
+        return res.json();
+    }
+
+    // ─── Tab Navigasyonu ──────────────────────────────────────
+    document.querySelectorAll('[data-tab]').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = item.dataset.tab;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            item.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
+    });
+
+    // ─── Ayarları Kaydet ─────────────────────────────────────
+    document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('saveSettingsBtn');
+        btn.textContent = '⏳ Kaydediliyor...'; btn.disabled = true;
+        const result = await saveProfile({
+            slug: document.getElementById('slugInput').value,
+            bio: document.getElementById('bioInput').value,
+            avatarFile: document.getElementById('avatarFile').files[0],
+            bannerFile: document.getElementById('bannerFile').files[0],
+        });
+        btn.textContent = 'AYARLARI KAYDET'; btn.disabled = false;
+        if (result.success) {
+            toast('Ayarlar kaydedildi!');
+            document.getElementById('publicProfileLink').textContent = `starhub.lol/${document.getElementById('slugInput').value}`;
+        } else {
+            toast(result.error || 'Bir hata oluştu', 'error');
+        }
+    });
+
+    // ─── Profil Kaydet (Ayarlar Tabı) ────────────────────────
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('saveProfileBtn');
+        btn.textContent = '⏳ Kaydediliyor...'; btn.disabled = true;
+        const result = await saveProfile({
+            slug: document.getElementById('slugInput').value,
+            bio: document.getElementById('bioInput').value,
+            avatarFile: document.getElementById('avatarFile').files[0],
+            bannerFile: document.getElementById('bannerFile').files[0],
+        });
+        btn.textContent = '💾 PROFİLİ KAYDET'; btn.disabled = false;
+        const msg = document.getElementById('saveMsg');
+        if (result.success) {
+            msg.textContent = `Profile URL: ${result.profileUrl}`;
+            msg.style.color = '#2ecc71';
+            toast('Profil kaydedildi!');
+        } else {
+            msg.textContent = result.error;
+            msg.style.color = '#FF4655';
+            toast(result.error, 'error');
+        }
+    });
+
+    // ─── Modal: Profil Düzenle ────────────────────────────────
+    document.getElementById('editProfileBtn').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('open');
+    });
+    document.getElementById('modalCancelBtn').addEventListener('click', () => {
+        document.getElementById('editModal').classList.remove('open');
+    });
+    document.getElementById('editModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('editModal')) {
             document.getElementById('editModal').classList.remove('open');
+        }
+    });
+    document.getElementById('modalSaveBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('modalSaveBtn');
+        btn.textContent = '⏳ Kaydediliyor...'; btn.disabled = true;
+        const result = await saveProfile({
+            slug: document.getElementById('modalSlug').value,
+            bio: document.getElementById('modalBio').value,
+            avatarFile: document.getElementById('modalAvatarFile').files[0],
+            bannerFile: document.getElementById('modalBannerFile').files[0],
         });
-        document.getElementById('modalSaveBtn').addEventListener('click', async () => {
-            const slug = document.getElementById('modalSlug').value;
-            const bio = document.getElementById('modalBio').value;
-            const banner = document.getElementById('modalBanner').value;
-            const result = await saveProfile(slug, bio, banner);
-            const msg = document.getElementById('modalSaveMsg');
-            if (result.success) {
-                msg.textContent = `✅ Kaydedildi! ${result.profileUrl}`;
-                msg.style.color = '#2ecc71';
-                document.getElementById('displayBio').textContent = bio;
-                if (banner) {
-                    document.getElementById('profileBannerDisplay').style.backgroundImage = `url('${banner}')`;
-                    document.getElementById('profileBannerDisplay').style.backgroundSize = 'cover';
-                }
-                setTimeout(() => document.getElementById('editModal').classList.remove('open'), 2000);
-            } else {
-                msg.textContent = `❌ ${result.error}`;
-                msg.style.color = '#FF4655';
-            }
-        });
+        btn.textContent = '💾 KAYDET'; btn.disabled = false;
+        if (result.success) {
+            toast('Profil güncellendi!');
+            document.getElementById('displayBio').textContent = document.getElementById('modalBio').value;
+            document.getElementById('publicProfileLink').textContent = `starhub.lol/${document.getElementById('modalSlug').value}`;
+            document.getElementById('publicProfileLink').href = `/${document.getElementById('modalSlug').value}`;
+            setTimeout(() => document.getElementById('editModal').classList.remove('open'), 1500);
+        } else {
+            document.getElementById('modalSaveMsg').textContent = result.error;
+            document.getElementById('modalSaveMsg').style.color = '#FF4655';
+            toast(result.error, 'error');
+        }
+    });
 
-        // ─── Rank Sync Butonu ─────────────────────────────────────────────────
-        document.getElementById('syncNowBtn').addEventListener('click', () => {
-            const btn = document.getElementById('syncNowBtn');
-            btn.textContent = 'Senkronize Ediliyor...';
-            btn.disabled = true;
-            setTimeout(() => {
-                btn.textContent = '✅ SENKRONİZE EDİLDİ!';
-                document.getElementById('lastSyncTime').textContent = 'Az önce';
-                setTimeout(() => { btn.textContent = '🔄 ŞİMDİ SENKRONİZE ET'; btn.disabled = false; }, 3000);
-            }, 2000);
-        });
+    // ─── Rank Sync ────────────────────────────────────────────
+    document.getElementById('syncNowBtn').addEventListener('click', () => {
+        const btn = document.getElementById('syncNowBtn');
+        btn.textContent = '⏳ Senkronize Ediliyor...'; btn.disabled = true;
+        setTimeout(() => {
+            btn.textContent = '🔄 ŞİMDİ SENKRONİZE ET'; btn.disabled = false;
+            document.getElementById('lastSyncTime').textContent = 'Az önce';
+            toast('Rank senkronize edildi!');
+        }, 2000);
+    });
+
+    // ─── Çıkış ───────────────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.cookie = 'shub_session=; Path=/; Max-Age=0; Secure';
+        window.location.href = '/';
+    });
     </script>
 </body>
 </html>
