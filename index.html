@@ -24,75 +24,66 @@
     <nav class="navbar">
         <div class="nav-logo">
             <img src="logo.png" alt="StarHUB" class="nav-icon">
-            <span>StarHUB</span>
+            <span>STARHUB</span>
         </div>
         <div class="nav-links">
-            <a href="#features">Özellikler</a>
-            <a href="#faq">SSS</a>
-            <a href="login.html" class="nav-btn">Giriş Yap</a>
+            <a href="#showcase">Keşfet</a>
+            <a href="https://discord.gg/starhub">Discord</a>
+            <a href="login.html" class="nav-btn">Giriş</a>
         </div>
     </nav>
     
     <main class="hero">
         <div class="hero-content">
-            <div class="badge-new">NEW: RIOT GAMES SYNC READY</div>
-            <h1 class="main-title">VALORANT KİMLİĞİNİ <br><span class="highlight">GÜNCELLE</span></h1>
+            <div class="badge-new">CRYSTALLINE UPDATE ❄️</div>
+            <h1 class="main-title">DAHA <span class="highlight">GÜÇLÜ</span>,<br>DAHA <span class="highlight">PARLAK</span>.</h1>
             <p class="hero-desc">
-                Riot Games ve Discord hesabını StarHUB ekosistemine bağlayarak 
-                profesyonel oyuncu kimliğini yarat ve sunucu avantajlarını elde et.
+                StarHUB'ın yeni nesil "Crystalline" altyapısıyla Valorant kimliğini yarat, 
+                rankını senkronize et ve elit oyuncu topluluğunda parlamaya başla.
             </p>
             
             <div class="actions">
                 <a href="login.html" class="primary-btn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Riot_Games_logo.svg" alt="Riot" class="riot-mini">
-                    <span>Hemen Bağlan</span>
+                    <img src="logo.png" class="riot-mini" alt="StarHUB">
+                    <span>HEMEN BAŞLA</span>
                 </a>
                 <a href="https://discord.gg/starhub" class="secondary-btn">
-                    <span>Discord'a Katıl</span>
+                    <span>DISCORD KATIL</span>
                 </a>
             </div>
             <div class="onboarding-steps">
-                <span>01. Bağlan → </span>
-                <span>02. Senkronize Et → </span>
-                <span>03. Rolünü Al!</span>
+                GÜVENİLLİR • HIZLI • ÜCRETSİZ
             </div>
         </div>
     </main>
 
-    <section id="features" class="features-section">
-        <div class="section-header">
-            <h2>Neden StarHUB?</h2>
-            <p>Sizler için en iyi sistemleri bir araya getirdik.</p>
+    <!-- Showcase Section -->
+    <section id="showcase" class="showcase-section">
+        <div class="section-header" style="text-align: center; margin-bottom: 5rem;">
+            <h2 style="font-size: 3rem; font-weight: 950; letter-spacing: -1px;">ELİT <span class="highlight">OYUNCULAR</span></h2>
+            <p style="color: var(--text-secondary); margin-top: 1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">Topluluğumuzun Öne Çıkanları</p>
         </div>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="f-icon">🛡️</div>
-                <h3>Güvenli Doğrulama</h3>
-                <p>Riot Games OAuth 2.0 altyapısı ile şifrenizi paylaşmadan güvenli giriş yapın.</p>
-            </div>
-            <div class="feature-card highlight-card">
-                <div class="f-icon">🔄</div>
-                <h3>Otomatik Rank Sync</h3>
-                <p>Rank atladığınızda Discord rolleriniz tek tıkla veya otomatik güncellenir.</p>
-            </div>
-            <div class="feature-card">
-                <div class="f-icon">📊</div>
-                <h3>Dinamik İstatistikler</h3>
-                <p>Profilinizde maç geçmişiniz ve favori ajanlarınız sergilenir.</p>
+        <div id="showcaseGrid" class="showcase-grid">
+            <!-- Dynamic Profiles Here -->
+            <div style="text-align: center; grid-column: 1/-1; padding: 4rem; color: var(--text-secondary);">
+                Profiller yükleniyor...
             </div>
         </div>
     </section>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <p>© 2026 StarHUB. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#">Terms</a>
-                <a href="#">Privacy</a>
-                <a href="#">Riot Games Support</a>
+    <footer class="footer" style="padding: 6rem 10% 4rem; border-top: 1px solid var(--glass-border);">
+        <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4rem;">
+            <div class="nav-logo">
+                <img src="logo.png" alt="StarHUB" style="width: 35px;">
+                <span style="font-size: 1.2rem;">STARHUB</span>
+            </div>
+            <div class="footer-links" style="display: flex; gap: 3rem;">
+                <a href="#" style="color: var(--text-secondary); text-decoration: none; font-weight: 700; font-size: 0.8rem;">TERMS</a>
+                <a href="#" style="color: var(--text-secondary); text-decoration: none; font-weight: 700; font-size: 0.8rem;">PRIVACY</a>
+                <a href="https://discord.gg/starhub" style="color: var(--text-secondary); text-decoration: none; font-weight: 700; font-size: 0.8rem;">SUPPORT</a>
             </div>
         </div>
-        <p class="riot-disclaimer">
+        <p class="riot-disclaimer" style="font-size: 0.75rem; color: rgba(255,255,255,0.15); font-weight: 600; line-height: 1.6; text-align: center;">
             StarHUB is not endorsed by Riot Games and doesn't reflect the views of Riot Games or anyone officially involved in producing or managing Riot Games properties.
         </p>
     </footer>
@@ -108,6 +99,54 @@
             star.style.animationDelay = `${Math.random() * 5}s`;
             starsContainer.appendChild(star);
         }
+
+        // Fetch and Render Members
+        async function loadMembers() {
+            const grid = document.getElementById('showcaseGrid');
+            try {
+                const res = await fetch('/api/members');
+                const members = await res.json();
+                
+                if (!members || members.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 4rem; color: var(--text-secondary);">Henüz kimse profilini paylaşmadı.</div>';
+                    return;
+                }
+
+                grid.innerHTML = members.map(m => {
+                    const banner = m.banner_url ? `style="background-image: url('${m.banner_url}')"` : '';
+                    const avatar = m.avatar_url || '/logo.png';
+                    const rankImg = m.rank_name ? `https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${m.rank_name.toLowerCase().replace(' ', '')}.png` : '';
+                    
+                    return `
+                        <div class="ec-card">
+                            <div class="ec-banner" ${banner}></div>
+                            <div class="ec-content">
+                                <div class="ec-avatar-box">
+                                    <img src="${avatar}" alt="${m.username}" class="ec-avatar" onerror="this.src='/logo.png'">
+                                </div>
+                                <h3 class="ec-name">${m.username}</h3>
+                                <div class="ec-rank-row">
+                                    <img src="${rankImg}" class="ec-rank-icon" onerror="this.style.display='none'">
+                                    <span class="ec-rank-name">${m.rank_name || 'Unranked'}</span>
+                                </div>
+                                <p class="ec-bio">${m.bio || 'StarHUB Elite Member'}</p>
+                                <a href="/${m.slug}" class="ec-btn">
+                                    <span>Profili Gör</span>
+                                    <svg class="ec-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Fetch error:', err);
+                grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 4rem; color: var(--text-secondary);">Veriler yüklenirken bir hata oluştu.</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMembers);
     </script>
 </body>
 </html>

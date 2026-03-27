@@ -204,7 +204,23 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 3. ADMIN API (GİZLİ)  →  /api/admin/users
+  // 3. MEMBERS API  →  /api/members
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/members') {
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    };
+    try {
+      const users = await env.DB.prepare('SELECT user_id, username, slug, avatar_url, banner_url, bio, rank_name, rank_rr FROM profiles WHERE is_public = 1 ORDER BY created_at DESC').all();
+      return new Response(JSON.stringify(users.results), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 4. ADMIN API (GİZLİ)  →  /api/admin/users
   // ══════════════════════════════════════════════════════════════
   if (pathname === '/api/admin/users') {
     const cookieString = request.headers.get('Cookie') || '';

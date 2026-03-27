@@ -12,6 +12,22 @@
     <link rel="icon" type="image/png" href="/logo.png">
     <style>
         /* Critical inline styles for profile page */
+        :root {
+            --accent-teal: #a0c4d6;
+            --accent-glow: rgba(160, 196, 214, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.015);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --text-secondary: rgba(255, 255, 255, 0.4);
+        }
+
+        body {
+            background: #050608;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
         .profile-page-wrap {
             min-height: 100vh;
             display: flex;
@@ -20,157 +36,182 @@
             position: relative;
             z-index: 10;
         }
+
         .profile-topbar {
             width: 100%;
-            max-width: 860px;
+            max-width: 900px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 2rem 1.5rem;
+            padding: 3rem 2rem;
         }
+
         .ptb-logo {
-            display: flex; align-items: center; gap: 12px;
+            display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: #fff;
-            font-weight: 900; font-size: 1.1rem; letter-spacing: 1px;
+            font-weight: 950; font-size: 1.4rem; letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        .ptb-logo img { width: 32px; }
+
+        .ptb-logo img { width: 40px; filter: drop-shadow(0 0 10px var(--accent-glow)); }
+
         .ptb-btn {
-            background: #FF4655; color: #fff;
-            padding: 0.65rem 1.5rem; border-radius: 50px;
-            text-decoration: none; font-weight: 800;
-            font-size: 0.85rem; transition: 0.3s;
+            background: #fff; color: #000;
+            padding: 1rem 2rem; border-radius: 16px;
+            text-decoration: none; font-weight: 950;
+            font-size: 0.9rem; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 1px;
         }
-        .ptb-btn:hover { transform: scale(1.05); background: #e63e4b; }
+
+        .ptb-btn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 10px 30px rgba(255,255,255,0.1); }
 
         .profile-card-outer {
-            width: 100%; max-width: 860px;
-            padding: 0 1.5rem 4rem;
+            width: 100%; max-width: 900px;
+            padding: 0 2rem 6rem;
         }
+
         .pc-wrap {
-            background: rgba(255,255,255,0.025);
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(50px);
-            border-radius: 32px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(80px);
+            border-radius: 40px;
             overflow: hidden;
-            animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
         }
+
         @keyframes cardIn {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .pc-banner {
-            width: 100%; height: 220px;
-            background: linear-gradient(135deg, #1a0508 0%, #2c0f14 50%, #0a0a1a 100%);
+            width: 100%; height: 280px;
+            background: linear-gradient(135deg, #0a1014 0%, #1a242b 100%);
             background-size: cover;
             background-position: center;
             position: relative;
         }
-        .pc-banner::after {
-            content: '';
-            position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
-        }
-        .pc-body { padding: 0 2.5rem 2.5rem; }
+
+        .pc-body { padding: 0 3.5rem 3.5rem; }
+
         .pc-top-row {
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
-            margin-top: -55px;
-            margin-bottom: 1.5rem;
+            margin-top: -70px;
+            margin-bottom: 2.5rem;
         }
+
         .pc-avatar-box { position: relative; }
+
         .pc-avatar {
-            width: 110px; height: 110px;
-            border-radius: 24px;
-            border: 5px solid #080a0c;
-            background: #080a0c;
+            width: 140px; height: 140px;
+            border-radius: 40px;
+            border: 8px solid #050608;
+            background: #050608;
             object-fit: cover;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
         }
+
         .pc-online {
-            position: absolute; bottom: 6px; right: -4px;
-            width: 16px; height: 16px;
+            position: absolute; bottom: 12px; right: 0;
+            width: 24px; height: 24px;
             background: #2ecc71; border-radius: 50%;
-            border: 3px solid #080a0c;
+            border: 5px solid #050608;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
         }
-        .pc-badges { display: flex; gap: 0.6rem; padding-bottom: 0.5rem; }
+
+        .pc-badges { display: flex; gap: 0.8rem; padding-bottom: 1rem; }
+
         .pc-badge {
-            background: rgba(255,70,85,0.12);
-            color: #FF4655;
-            border: 1px solid rgba(255,70,85,0.25);
-            padding: 0.35rem 0.9rem;
-            border-radius: 50px;
-            font-size: 0.72rem;
-            font-weight: 900;
-            letter-spacing: 1px;
+            background: rgba(160, 196, 214, 0.08);
+            color: var(--accent-teal);
+            border: 1px solid rgba(160, 196, 214, 0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 950;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        .pc-badge.verified { background: rgba(88,101,242,0.12); color: #5865F2; border-color: rgba(88,101,242,0.25); }
 
-        .pc-name-row { margin-bottom: 0.6rem; }
+        .pc-badge.verified { background: rgba(5,6,8,0.2); color: #fff; border-color: var(--glass-border); }
+
+        .pc-name-row { margin-bottom: 0.8rem; }
+
         .pc-name {
-            font-size: 2rem; font-weight: 900;
-            display: flex; align-items: center; gap: 0.8rem;
+            font-size: 2.8rem; font-weight: 950;
+            letter-spacing: -1.5px;
+            text-transform: uppercase;
+            display: flex; align-items: center; gap: 1rem;
         }
-        .pc-disc { color: rgba(255,255,255,0.3); font-size: 1.2rem; }
-        .pc-bio { color: rgba(255,255,255,0.55); font-size: 1rem; line-height: 1.5; margin-bottom: 0.8rem; }
-        .pc-slug-link { font-size: 0.8rem; color: #FF4655; font-weight: 700; text-decoration: none; }
-        .pc-slug-link:hover { text-decoration: underline; }
 
-        .pc-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 2rem 0; }
+        .pc-disc { color: rgba(255,255,255,0.15); font-size: 1.5rem; letter-spacing: 0; }
+        .pc-bio { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.2rem; font-weight: 500; }
+        .pc-slug-link { font-size: 0.9rem; color: var(--accent-teal); font-weight: 900; text-decoration: none; border-bottom: 1px solid rgba(160, 196, 214, 0.2); transition: 0.3s; }
+        .pc-slug-link:hover { color: #fff; border-color: #fff; }
+
+        .pc-divider { height: 1px; background: var(--glass-border); margin: 3rem 0; }
 
         .pc-stats-row {
             display: grid;
-            grid-template-columns: 1fr 1px 1fr;
-            gap: 0;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
         }
-        .pc-stat { text-align: center; padding: 1.5rem; }
-        .pc-stat-sep { background: rgba(255,255,255,0.06); }
+
+        .stat-group {
+            background: rgba(255,255,255,0.01);
+            padding: 2rem;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
         .pc-stat-label {
-            font-size: 0.65rem; letter-spacing: 2.5px;
-            color: rgba(255,255,255,0.35); font-weight: 900;
-            text-transform: uppercase; margin-bottom: 1rem;
+            font-size: 0.7rem; letter-spacing: 3px;
+            color: rgba(255,255,255,0.25); font-weight: 950;
+            text-transform: uppercase; margin-bottom: 1.8rem;
         }
-        .pc-rank-row { display: flex; align-items: center; justify-content: center; gap: 1rem; }
-        .pc-rank-img { width: 55px; }
-        .pc-rank-name { font-size: 1.4rem; font-weight: 900; }
-        .pc-rank-rr { font-size: 0.9rem; color: #FF4655; font-weight: 800; }
-        .pc-platform-name { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.4rem; }
-        .pc-platform-sub { font-size: 0.85rem; color: #2ecc71; font-weight: 700; }
+
+        .pc-rank-row { display: flex; align-items: center; gap: 1.5rem; }
+        .pc-rank-img { width: 70px; filter: drop-shadow(0 0 20px var(--accent-glow)); }
+        .pc-rank-name { font-size: 1.8rem; font-weight: 950; text-transform: uppercase; }
+        .pc-rank-rr { font-size: 1rem; color: var(--accent-teal); font-weight: 800; letter-spacing: 1px; }
+        .pc-platform-name { font-size: 1.6rem; font-weight: 950; margin-bottom: 0.6rem; text-transform: uppercase; }
+        .pc-platform-sub { font-size: 0.9rem; color: #2ecc71; font-weight: 800; letter-spacing: 1px; }
 
         .pc-footer-row {
-            display: flex; gap: 1rem;
-            margin-top: 2.5rem;
+            display: flex; gap: 1.2rem;
+            margin-top: 3.5rem;
         }
+
         .pc-footer-btn {
             flex: 1; text-align: center;
-            padding: 1rem; border-radius: 14px;
-            text-decoration: none; font-weight: 800;
-            font-size: 0.9rem; transition: 0.35s;
+            padding: 1.2rem; border-radius: 18px;
+            text-decoration: none; font-weight: 950;
+            font-size: 0.9rem; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
-        .pc-footer-btn.blurple { background: #5865F2; color: #fff; }
-        .pc-footer-btn.blurple:hover { background: #4752c4; box-shadow: 0 10px 30px rgba(88,101,242,0.3); }
-        .pc-footer-btn.ghost { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; }
-        .pc-footer-btn.ghost:hover { border-color: #fff; }
 
-        @media (max-width: 680px) {
-            .pc-top-row { flex-direction: column; align-items: flex-start; gap: 1rem; margin-top: -40px; }
-            .pc-name { font-size: 1.5rem; }
-            .pc-stats-row { grid-template-columns: 1fr; }
-            .pc-stat-sep { display: none; }
-            .pc-body { padding: 0 1.5rem 2rem; }
-        }
+        .pc-footer-btn.blurple { background: #5865F2; color: #fff; box-shadow: 0 10px 30px rgba(88,101,242,0.2); }
+        .pc-footer-btn.blurple:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(88,101,242,0.4); }
+        .pc-footer-btn.ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; }
+        .pc-footer-btn.ghost:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
 
         /* NOT FOUND STATE */
         .nf-state {
             text-align: center;
-            padding: 5rem 2rem;
+            padding: 6rem 3rem;
         }
-        .nf-state h2 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .nf-state p { color: rgba(255,255,255,0.4); margin-bottom: 2rem; }
+        .nf-state h2 { font-size: 3.5rem; font-weight: 950; letter-spacing: -2px; margin-bottom: 1rem; }
+        .nf-state p { color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 3rem; font-weight: 500; }
         .nf-btn {
             display: inline-block;
-            background: #FF4655; color: #fff;
-            padding: 1rem 2.5rem; border-radius: 14px;
-            text-decoration: none; font-weight: 800; transition: 0.3s;
+            background: var(--accent-teal); color: #000;
+            padding: 1.2rem 3.5rem; border-radius: 18px;
+            text-decoration: none; font-weight: 950; transition: 0.3s;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -261,7 +302,7 @@
                         <div class="pc-divider"></div>
 
                         <div class="pc-stats-row">
-                            <div class="pc-stat">
+                            <div class="stat-group">
                                 <div class="pc-stat-label">Valorant Rank</div>
                                 <div class="pc-rank-row">
                                     <img src="${rankImg}" alt="${rankName}" class="pc-rank-img" onerror="this.style.display='none'">
@@ -271,16 +312,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="pc-stat-sep"></div>
-                            <div class="pc-stat">
-                                <div class="pc-stat-label">Platform</div>
-                                <div class="pc-platform-name">StarHUB</div>
-                                <div class="pc-platform-sub">🔒 Discord Doğrulandı</div>
+                            <div class="stat-group">
+                                <div class="pc-stat-label">Doğrulama</div>
+                                <div class="pc-platform-name">STARHUB</div>
+                                <div class="pc-platform-sub">🛡️ DISCORD VERIFIED</div>
                             </div>
                         </div>
 
                         <div class="pc-footer-row">
-                            <a href="https://discord.gg/starhub" class="pc-footer-btn blurple">Discord'a Katıl</a>
+                            <a href="https://discord.gg/starhub" class="pc-footer-btn blurple" target="_blank">Discord'a Katıl</a>
                             <a href="/login.html" class="pc-footer-btn ghost">Kendi Profilini Oluştur</a>
                         </div>
                     </div>
