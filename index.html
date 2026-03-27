@@ -279,7 +279,7 @@
                         <div class="dashboard-top-actions">
                             <div class="user-badge-mini">
                                 <img src="${localStorage.getItem('sh_avatar') || 'https://via.placeholder.com/32'}" id="mini_avatar">
-                                <span id="mini_username">${localStorage.getItem('sh_username') || 'siyah'}</span>
+                                <span id="mini_username">${localStorage.getItem('sh_username') || 'New Creator'}</span>
                             </div>
                             <button class="btn btn-primary-white" onclick="saveProfileSettings()">SAVE ESSENCE</button>
                         </div>
@@ -312,7 +312,7 @@
                             <!-- Overview Tab -->
                             <div id="dash_Overview" class="dash-tab-content active">
                                 <div class="welcome-card-modern">
-                                    <h2>Welcome back, ${localStorage.getItem('sh_username') || 'siyah'}</h2>
+                                    <h2>Welcome back, ${localStorage.getItem('sh_username') || 'New Creator'}</h2>
                                     <p>Your digital signature is active and visible across the StarHUB.</p>
                                     
                                     <div class="stats-grid-modern">
@@ -606,25 +606,24 @@
                 
                 if (viewName === 'Community') {
                     // Fetch real data from Cloudflare DB
-                    fetch('/api/members').then(r => r.json()).then(data => {
+                    fetch('/api/members').then(r => r.ok ? r.json() : []).then(data => {
                         const community = document.getElementById('community_list_container');
-                        if (community && data.length > 0) {
+                        if (community) {
+                            if (data.length === 0) {
+                                community.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No community members found yet. Be the first!</p>';
+                                return;
+                            }
                             community.innerHTML = data.map(user => `
                                 <div class="creator-card animate" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-                                    <!-- Banner Area -->
                                     <div style="height: 100px; background: ${user.banner ? `url('${user.banner}') center/cover` : 'var(--bg-tertiary)'}; background-color: #1a1c1e;"></div>
-                                    
                                     <div style="padding: 1.5rem; position: relative; flex: 1; display: flex; flex-direction: column;">
-                                        <!-- Overlapping Avatar -->
                                         <div style="width: 70px; height: 70px; border-radius: 50%; background: #000; border: 4px solid #0d0f12; margin-top: -50px; margin-bottom: 1rem; position: relative;">
                                             <div style="width: 100%; height: 100%; border-radius: 50%; background: url('${user.avatar || ''}') center/cover; background-color: var(--bg-tertiary);"></div>
                                         </div>
-
                                         <div style="flex: 1;">
                                             <h4 style="font-size: 1.2rem; margin-bottom: 0.2rem;">${user.username}</h4>
                                             <p style="color: var(--text-secondary); font-size: 0.8rem; height: 3em; overflow: hidden; margin-bottom: 1.5rem;">${user.short_desc || 'StarHUB Community Member'}</p>
                                         </div>
-
                                         <button class="btn btn-dark-grey" style="width: 100%; background: #21262d; border: none; padding: 0.8rem; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="navigateTo('/${user.username}')">
                                             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> View Profile
                                         </button>
@@ -632,6 +631,8 @@
                                 </div>
                             `).join('');
                         }
+                    }).catch(e => {
+                        console.error('Community fetch failed:', e);
                     });
                 }
                 
@@ -784,8 +785,11 @@
                 localStorage.setItem('sh_logged_in', 'true');
                 
                 // Add to Cloudflare DB
+                const generatedName = localStorage.getItem('sh_username') || 'User_' + Math.floor(Math.random() * 9000 + 1000);
+                if (!localStorage.getItem('sh_username')) localStorage.setItem('sh_username', generatedName);
+
                 const userData = {
-                    username: localStorage.getItem('sh_username') || 'siyah',
+                    username: generatedName,
                     short_desc: localStorage.getItem('sh_short_desc') || 'Verified Creator',
                     avatar: localStorage.getItem('sh_avatar') || '',
                     banner: localStorage.getItem('sh_banner') || ''
