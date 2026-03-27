@@ -6,16 +6,17 @@ export async function onRequest(context) {
 
     try {
         const body = await request.json();
-        const { username, short_desc, avatar } = body;
+        const { username, short_desc, avatar, banner } = body;
 
         // Insert or update user
         await env.DB.prepare(`
-            INSERT INTO users (username, short_desc, avatar) 
-            VALUES (?1, ?2, ?3)
+            INSERT INTO users (username, short_desc, avatar, banner) 
+            VALUES (?1, ?2, ?3, ?4)
             ON CONFLICT(username) DO UPDATE SET 
             short_desc = excluded.short_desc,
-            avatar = excluded.avatar
-        `).bind(username, short_desc, avatar).run();
+            avatar = excluded.avatar,
+            banner = excluded.banner
+        `).bind(username, short_desc, avatar, banner).run();
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }
