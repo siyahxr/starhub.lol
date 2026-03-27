@@ -1,0 +1,7 @@
+name = "starhub-lol"
+pages_build_output_dir = "./"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "starhub_db"
+database_id = "f9c344fa-9efa-4454-b799-5a5c8883dc90"
