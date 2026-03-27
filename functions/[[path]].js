@@ -204,21 +204,56 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 3. STATİK DOSYALAR — doğrudan sun
+  // 3. ADMIN API (GİZLİ)  →  /api/admin/users
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/admin/users') {
+    const cookieString = request.headers.get('Cookie') || '';
+    const sessionMatch = cookieString.match(/shub_session=([^;]+)/);
+
+    if (!sessionMatch) {
+      return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 401 });
+    }
+
+    try {
+      const sessionData = JSON.parse(decodeURIComponent(escape(atob(sessionMatch[1]))));
+      const user_id = sessionData.id;
+
+      // Yetki kontrolü: Sadece 'syh' ve 'winse' slug'larına sahip olanlar
+      const adminUser = await env.DB.prepare('SELECT slug FROM profiles WHERE user_id = ?').bind(user_id).first();
+
+      if (!adminUser || !['syh', 'winse'].includes(adminUser.slug)) {
+        return new Response(JSON.stringify({ error: 'Bu alana erişim yetkiniz yok.' }), { status: 403 });
+      }
+
+      // Tüm kullanıcıları çek
+      const users = await env.DB.prepare('SELECT * FROM profiles ORDER BY created_at DESC').all();
+      return new Response(JSON.stringify(users.results), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: 'Sunucu hatası' }), { status: 500 });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 4. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
     '/', '/index.html', '/login.html', '/login', '/dashboard.html',
-    '/dashboard', '/profile.html', '/style.css', '/logo.png', '/bg.png',
-    '/riot.txt', '/schema.sql', '/favicon.ico',
+    '/dashboard', '/admin', '/admin/index.html', '/profile.html',
+    '/style.css', '/logo.png', '/bg.png', '/riot.txt', '/schema.sql', '/favicon.ico',
   ];
 
   if (staticPaths.includes(pathname) || pathname.match(/\.[a-z0-9]+$/i)) {
-    // /login → login.html, /dashboard → dashboard.html
+    // /login → login.html, /dashboard → dashboard.html, /admin → admin/index.html
     if (pathname === '/login') {
       return env.ASSETS.fetch(new Request(new URL('/login.html', url).toString()));
     }
     if (pathname === '/dashboard') {
       return env.ASSETS.fetch(new Request(new URL('/dashboard.html', url).toString()));
+    }
+    if (pathname === '/admin') {
+      return env.ASSETS.fetch(new Request(new URL('/admin/index.html', url).toString()));
     }
     return env.ASSETS.fetch(request);
   }

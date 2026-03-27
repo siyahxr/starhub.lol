@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        :root {
+            --admin-primary: #FF4655;
+            --admin-bg: #0F1923;
+            --admin-card: rgba(22, 33, 44, 0.8);
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(15, 25, 35, 0.95);
+            border-right: 1px solid rgba(255, 70, 85, 0.2);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-brand img {
+            width: 40px;
+        }
+
+        .admin-brand span {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: var(--admin-primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            padding: 1rem;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 70, 85, 0.1);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 3rem;
+            background: radial-gradient(circle at top right, rgba(255, 70, 85, 0.05), transparent);
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--admin-card);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--admin-primary);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        /* Table */
+        .user-table-container {
+            background: var(--admin-card);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0,0,0,0.2);
+            padding: 1.2rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--admin-primary);
+        }
+
+        .slug-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--admin-primary);
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--admin-primary);
+            background: var(--admin-primary);
+        }
+
+        #authGuard {
+            position: fixed;
+            inset: 0;
+            background: var(--admin-bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: var(--admin-primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="authGuard">
+        <span class="loader"></span>
+        <p>Yetkilendirme kontrol ediliyor...</p>
+    </div>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="admin-brand">
+                <img src="/logo.png" alt="StarHUB">
+                <span>STARHUB</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="/admin" class="nav-item active">
+                    <i>👥</i> Kullanıcılar
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <i>🏠</i> Dashboard
+                </a>
+                <a href="/" class="nav-item">
+                    <i>🌐</i> Ana Sayfa
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header-actions">
+                <h1>Kullanıcı Yönetimi</h1>
+                <div class="user-meta">Admin: <span id="adminName" style="color:var(--admin-primary)">---</span></div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Kayıtlı Kullanıcı</div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                </div>
+                <!-- İleride başka statlar eklenebilir -->
+            </div>
+
+            <div class="user-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Slug</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function initAdmin() {
+            try {
+                // 1. Admin verilerini çek
+                const res = await fetch('/api/admin/users');
+                
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login?error=unauthorized';
+                    return;
+                }
+
+                if (!res.ok) throw new Error('API Hatası');
+
+                const users = await res.json();
+                document.getElementById('authGuard').style.display = 'none';
+                
+                // 2. Tabloyu doldur
+                renderUsers(users);
+                
+                // 3. Statları güncelle
+                document.getElementById('totalUsers').textContent = users.length;
+
+                // 4. Admin ismini cookie'den çöz
+                const session = getSession();
+                if(session) document.getElementById('adminName').textContent = session.username;
+
+            } catch (err) {
+                console.error(err);
+                alert('Admin verileri yüklenirken hata oluştu!');
+            }
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                const date = new Date(user.created_at).toLocaleDateString('tr-TR');
+                
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-cell">
+                            <img src="${user.avatar_url || '/logo.png'}" class="user-avatar" onerror="this.src='/logo.png'">
+                            <div>
+                                <div style="font-weight:700">${user.username}</div>
+                                <div style="font-size:0.75rem; color:rgba(255,255,255,0.4)">ID: ${user.user_id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="slug-badge">/${user.slug}</span></td>
+                    <td>${date}</td>
+                    <td>
+                        <a href="/${user.slug}" target="_blank" class="action-btn">Profili Gör</a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getCookie(name) {
+            const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+            return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
+        }
+
+        function getSession() {
+            const cookie = getCookie('shub_session');
+            if (!cookie) return null;
+            try {
+                return JSON.parse(decodeURIComponent(escape(atob(cookie))));
+            } catch { return null; }
+        }
+
+        // Başlat
+        initAdmin();
+    </script>
+</body>
+</html>
