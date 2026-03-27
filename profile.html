@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>__USERNAME__ | StarHUB</title>
+    <meta name="description" content="__BIO__ — StarHUB Profili">
+    <meta property="og:title" content="__USERNAME__ | StarHUB">
+    <meta property="og:description" content="__BIO__">
+    <meta property="og:image" content="__AVATAR_URL__">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/png" href="/logo.png">
+</head>
+<body class="profile-body">
+    <div class="stars"></div>
+    <div class="premium-bg"></div>
+    <div class="vignette"></div>
+
+    <!-- Nav -->
+    <nav class="profile-nav">
+        <a href="/" class="profile-nav-logo">
+            <img src="/logo.png" alt="StarHUB">
+            <span>StarHUB</span>
+        </a>
+        <a href="/login.html" class="nav-join-btn">Profilini Oluştur →</a>
+    </nav>
+
+    <main class="profile-main-zone">
+        <!-- ID Card -->
+        <div class="id-card">
+            <!-- Banner -->
+            <div class="id-banner" id="idBanner" style="background-image: url('__BANNER_URL__')"></div>
+
+            <!-- Avatar + Temel Bilgiler -->
+            <div class="id-core">
+                <div class="id-avatar-wrap">
+                    <img src="__AVATAR_URL__" alt="__USERNAME__" class="id-avatar" id="idAvatar">
+                    <div class="id-online-dot"></div>
+                </div>
+                <div class="id-info">
+                    <h1 class="id-name">__USERNAME__ <span class="id-badge">✦ ELITE</span></h1>
+                    <p class="id-bio">__BIO__</p>
+                    <span class="id-tag">starhub.lol/__SLUG__</span>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="id-stats">
+                <div class="id-stat">
+                    <span class="id-stat-label">VALORANT RANK</span>
+                    <div class="id-rank-row">
+                        <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="id-rank-icon" id="idRankImg">
+                        <div>
+                            <span class="id-stat-value" id="idRankName">__RANK_NAME__</span>
+                            <span class="id-stat-sub" id="idRankRR">__RANK_RR__ RR</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="id-divider"></div>
+                <div class="id-stat">
+                    <span class="id-stat-label">PLATFORM</span>
+                    <span class="id-stat-value">StarHUB</span>
+                    <span class="id-stat-sub">Discord Doğrulandı</span>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="id-footer">
+                <a href="https://discord.gg/starhub" class="id-discord-btn">Discord'a Katıl</a>
+                <a href="/login.html" class="id-create-btn">Kendi Profilini Oluştur</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Stars
+        const starsContainer = document.querySelector('.stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
+
+        // Banner fallback
+        const banner = document.getElementById('idBanner');
+        if (!banner.style.backgroundImage || banner.style.backgroundImage === 'url("")') {
+            banner.style.background = 'linear-gradient(135deg, #1a0a0e 0%, #2c0f14 50%, #1a0a0e 100%)';
+        }
+    </script>
+</body>
+</html>

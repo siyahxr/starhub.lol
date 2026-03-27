@@ -21,114 +21,356 @@
             <span>StarHUB</span>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" class="nav-item active">👤 Profil</a>
-            <a href="#" class="nav-item">🛡️ Rank Sync</a>
-            <a href="#" class="nav-item">📈 İstatistikler</a>
-            <a href="#" class="nav-item">⚔️ Takım Bul</a>
-            <a href="#" class="nav-item">⚙️ Ayarlar</a>
+            <a href="#" class="nav-item active" data-tab="profile">👤 Profil</a>
+            <a href="#" class="nav-item" data-tab="rank">🛡️ Rank Sync</a>
+            <a href="#" class="nav-item" data-tab="stats">📈 İstatistikler</a>
+            <a href="#" class="nav-item" data-tab="team">⚔️ Takım Bul</a>
+            <a href="#" class="nav-item" data-tab="settings">⚙️ Ayarlar</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="index.html" class="logout-btn">Güvenli Çıkış</a>
+            <a href="index.html" class="logout-btn">🚪 Güvenli Çıkış</a>
         </div>
     </aside>
 
     <div class="dashboard-wrapper">
         <header class="dash-top-nav">
             <div class="dash-welcome">
-                <h1>Hoş geldin, <span class="user-highlight">Agent</span></h1>
+                <h1>Hoş geldin, <span class="user-highlight" id="welcomeName">Agent</span></h1>
                 <p>Profilini ve Valorant rankını buradan yönetebilirsin.</p>
             </div>
             <div class="user-pill">
                 <div class="pill-info">
-                    <span class="pill-name">siyah#0001</span>
-                    <span class="pill-status">Hızır</span>
+                    <span class="pill-name" id="pillName">Yükleniyor...</span>
+                    <span class="pill-status">Aktif</span>
                 </div>
-                <img src="logo.png" alt="User" class="pill-avatar">
+                <img src="logo.png" alt="User" class="pill-avatar" id="pillAvatar">
             </div>
         </header>
 
         <main class="dash-main-scroll">
-            <section class="dash-grid">
-                <!-- Profile Card -->
-                <div class="dash-card-xl profile-main">
-                    <div class="profile-banner"></div>
-                    <div class="profile-details-row">
-                        <div class="avatar-wrap">
-                            <img src="logo.png" alt="Main Avatar" class="dash-main-avatar">
-                        </div>
-                        <div class="profile-meta">
-                            <h2>siyah <span class="tag">#0001</span></h2>
-                            <p>Premium Creator & StarHUB Elite</p>
-                        </div>
-                        <button class="edit-profile-btn">Profili Düzenle</button>
-                    </div>
-                </div>
 
-                <!-- Rank Card -->
-                <div class="dash-card-l rank-card">
-                    <div class="card-header-row">
-                        <h3>VALORANT RANK DURUMU</h3>
-                        <span class="live-indicator">CANLI SYNC</span>
+            <!-- ── TAB: PROFİL ── -->
+            <section class="tab-content active" id="tab-profile">
+                <div class="dash-grid">
+                    <div class="dash-card-xl profile-main">
+                        <div class="profile-banner" id="profileBannerDisplay" style="background: linear-gradient(135deg, #1a0a0e, #2c0f14)"></div>
+                        <div class="profile-details-row">
+                            <div class="avatar-wrap">
+                                <img src="logo.png" alt="Avatar" class="dash-main-avatar" id="mainAvatar">
+                            </div>
+                            <div class="profile-meta">
+                                <h2 id="displayName">siyah <span class="tag">#0001</span></h2>
+                                <p id="displayBio">StarHUB Elite Creator</p>
+                                <p class="profile-link-text">🔗 <a href="#" id="publicProfileLink" class="public-link">starhub.lol/...</a></p>
+                            </div>
+                            <button class="edit-profile-btn" id="editProfileBtn">Profili Düzenle</button>
+                        </div>
                     </div>
-                    
-                    <div class="rank-content">
+
+                    <div class="dash-card-l rank-card">
+                        <div class="card-header-row">
+                            <h3>VALORANT RANK</h3>
+                            <span class="live-indicator">CANLI</span>
+                        </div>
                         <div class="rank-visual">
-                            <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img">
+                            <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img" id="dashRankImg">
                             <div class="rank-label">
-                                <span class="rank-tier">ASCENDANT 2</span>
-                                <span class="rank-rr">78 RR</span>
+                                <span class="rank-tier" id="dashRankName">ASCENDANT 2</span>
+                                <span class="rank-rr" id="dashRankRR">78 RR</span>
                             </div>
                         </div>
-                        <div class="rank-actions">
-                            <button class="sync-now-btn">ŞİMDİ SENKRONİZE ET</button>
-                            <p class="last-sync">Son Güncelleme: 5 Dakika Önce</p>
-                        </div>
                     </div>
-                </div>
 
-                <!-- Settings & Toggles -->
-                <div class="dash-card-l settings-panel">
-                    <h3>HIZLI AYARLAR</h3>
-                    <div class="toggle-list">
-                        <div class="toggle-item">
-                            <div class="toggle-info">
-                                <span>Otomatik Rank Sync</span>
-                                <p>Rank atladığında Discord rolün oto güncellenir.</p>
+                    <div class="dash-card-l settings-panel">
+                        <h3>HIZLI AYARLAR</h3>
+                        <div class="toggle-list">
+                            <div class="toggle-item">
+                                <div class="toggle-info">
+                                    <span>Otomatik Rank Sync</span>
+                                    <p>Rank atladığında Discord rolün güncellenir.</p>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggleSync" checked><span class="slider"></span></label>
                             </div>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="toggle-item">
-                            <div class="toggle-info">
-                                <span>Profilim Herkese Açık</span>
-                                <p>Sitedeki aramalarda profilin görünür.</p>
+                            <div class="toggle-item">
+                                <div class="toggle-info">
+                                    <span>Profilim Herkese Açık</span>
+                                    <p>Sitede profilin görünür olsun.</p>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="togglePublic" checked><span class="slider"></span></label>
                             </div>
-                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
                         </div>
-                        <div class="toggle-item">
-                            <div class="toggle-info">
-                                <span>Market Bildirimleri</span>
-                                <p>Mağazadaki indirimli skinleri DM'den atar.</p>
-                            </div>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
+                        <button class="save-dash-btn" id="saveSettingsBtn">AYARLARI KAYDET</button>
                     </div>
-                    <button class="save-dash-btn">AYARLARI KAYDET</button>
                 </div>
             </section>
+
+            <!-- ── TAB: RANK SYNC ── -->
+            <section class="tab-content" id="tab-rank">
+                <div class="dash-grid">
+                    <div class="dash-card-xl">
+                        <div class="card-header-row">
+                            <h3>VALORANT RANK SENKRONİZASYONU</h3>
+                            <span class="live-indicator">CANLI SYNC</span>
+                        </div>
+                        <div class="rank-content">
+                            <div class="rank-visual">
+                                <img src="https://media.valorant-api.com/competitivetiers/03621f13-4331-1663-df26-68b375b43de1/20/largeicon.png" alt="Rank" class="dash-rank-img">
+                                <div class="rank-label">
+                                    <span class="rank-tier" id="syncRankName">ASCENDANT 2</span>
+                                    <span class="rank-rr" id="syncRankRR">78 RR</span>
+                                </div>
+                            </div>
+                            <button class="sync-now-btn" id="syncNowBtn">🔄 ŞİMDİ SENKRONİZE ET</button>
+                            <p class="last-sync">Son Güncelleme: <span id="lastSyncTime">Bilinmiyor</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── TAB: İSTATİSTİKLER ── -->
+            <section class="tab-content" id="tab-stats">
+                <div class="dash-grid">
+                    <div class="dash-card-xl">
+                        <h3>İSTATİSTİKLER</h3>
+                        <p style="color:var(--text-secondary); margin-top:1rem;">Valorant hesabı bağlandıktan sonra maç istatistiklerin burada görünecek.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── TAB: TAKIM BUL ── -->
+            <section class="tab-content" id="tab-team">
+                <div class="dash-grid">
+                    <div class="dash-card-xl">
+                        <h3>TAKIM BUL</h3>
+                        <p style="color:var(--text-secondary); margin-top:1rem;">Yakında — Discord sunucusundan /takımbul komutu ile şu an aktif!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── TAB: AYARLAR ── -->
+            <section class="tab-content" id="tab-settings">
+                <div class="dash-grid">
+                    <div class="dash-card-xl">
+                        <h3>PROFİL AYARLARI</h3>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label>Kullanıcı Adı (Profil Linki)</label>
+                                <div class="slug-input-wrap">
+                                    <span class="slug-prefix">starhub.lol/</span>
+                                    <input type="text" id="slugInput" placeholder="kullanici-adin" class="dash-input">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Bio</label>
+                                <textarea id="bioInput" class="dash-input" rows="3" placeholder="Kendinizi tanıtın..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Banner URL</label>
+                                <input type="text" id="bannerInput" class="dash-input" placeholder="https://...">
+                            </div>
+                            <button class="sync-now-btn" id="saveProfileBtn">💾 PROFİLİ KAYDET</button>
+                            <p class="save-msg" id="saveMsg"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
+    <!-- Profil Düzenleme Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <h2>Profili Düzenle</h2>
+            <div class="form-group">
+                <label>Profil Linki (Slug)</label>
+                <div class="slug-input-wrap">
+                    <span class="slug-prefix">starhub.lol/</span>
+                    <input type="text" id="modalSlug" class="dash-input" placeholder="kullanici-adin">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea id="modalBio" class="dash-input" rows="3" placeholder="Kendinizi tanıtın..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Banner Resim URL</label>
+                <input type="text" id="modalBanner" class="dash-input" placeholder="https://...">
+            </div>
+            <div class="modal-actions">
+                <button class="sync-now-btn" id="modalSaveBtn">💾 KAYDET</button>
+                <button class="save-dash-btn" id="modalCancelBtn">İptal</button>
+            </div>
+            <p class="save-msg" id="modalSaveMsg"></p>
+        </div>
+    </div>
+
     <script>
-        // Stars
-        const starsContainer = document.querySelector('.stars');
+        // ─── Star Generation ────────────────────────────────────────────────────
+        const starsEl = document.querySelector('.stars');
         for (let i = 0; i < 120; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.animationDelay = `${Math.random() * 5}s`;
-            starsContainer.appendChild(star);
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.left = `${Math.random() * 100}%`;
+            s.style.top = `${Math.random() * 100}%`;
+            s.style.animationDelay = `${Math.random() * 5}s`;
+            starsEl.appendChild(s);
         }
+
+        // ─── Session (Discord OAuth'tan gelen code ile gelecekte değişecek) ──
+        // Şimdilik localStorage'dan okuyoruz
+        const user = JSON.parse(localStorage.getItem('shub_user') || '{}');
+        const userId = user.id || null;
+
+        if (userId) {
+            document.getElementById('welcomeName').textContent = user.username || 'Agent';
+            document.getElementById('pillName').textContent = user.username || 'Agent';
+            if (user.avatar) {
+                const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
+                document.getElementById('pillAvatar').src = avatarUrl;
+                document.getElementById('mainAvatar').src = avatarUrl;
+            }
+            document.getElementById('displayName').innerHTML = `${user.username || 'Agent'} <span class="tag">#${user.discriminator || '0000'}</span>`;
+
+            // Veritabanından profil yükle
+            loadProfile(userId);
+        }
+
+        async function loadProfile(uid) {
+            try {
+                const res = await fetch(`/api/profile?user_id=${uid}`);
+                if (res.ok) {
+                    const profile = await res.json();
+                    applyProfile(profile);
+                }
+            } catch (e) { console.log('Profil yükleme hatası:', e); }
+        }
+
+        function applyProfile(profile) {
+            if (profile.bio) document.getElementById('displayBio').textContent = profile.bio;
+            if (profile.slug) {
+                document.getElementById('publicProfileLink').textContent = `starhub.lol/${profile.slug}`;
+                document.getElementById('publicProfileLink').href = `/${profile.slug}`;
+            }
+            if (profile.banner_url) {
+                document.getElementById('profileBannerDisplay').style.backgroundImage = `url('${profile.banner_url}')`;
+                document.getElementById('profileBannerDisplay').style.backgroundSize = 'cover';
+            }
+            if (profile.slug) document.getElementById('slugInput').value = profile.slug;
+            if (profile.bio) document.getElementById('bioInput').value = profile.bio;
+            if (profile.banner_url) document.getElementById('bannerInput').value = profile.banner_url;
+            if (profile.slug) { document.getElementById('modalSlug').value = profile.slug; }
+            if (profile.bio) { document.getElementById('modalBio').value = profile.bio; }
+            if (profile.banner_url) { document.getElementById('modalBanner').value = profile.banner_url; }
+            if (profile.sync_active !== undefined) document.getElementById('toggleSync').checked = !!profile.sync_active;
+            if (profile.is_public !== undefined) document.getElementById('togglePublic').checked = !!profile.is_public;
+        }
+
+        async function saveProfile(slug, bio, bannerUrl) {
+            const body = {
+                user_id: userId || 'demo_user',
+                username: user.username || 'demo',
+                slug: slug || user.username || 'demo',
+                bio,
+                banner_url: bannerUrl,
+                avatar_url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : '/logo.png',
+                is_public: document.getElementById('togglePublic').checked ? 1 : 0,
+                sync_active: document.getElementById('toggleSync').checked ? 1 : 0
+            };
+
+            const res = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            return res.json();
+        }
+
+        // ─── Tab Navigation ───────────────────────────────────────────────────
+        document.querySelectorAll('[data-tab]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabId = item.dataset.tab;
+
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+                item.classList.add('active');
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            });
+        });
+
+        // ─── Ayarları Kaydet Butonu ───────────────────────────────────────────
+        document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveSettingsBtn');
+            btn.textContent = 'Kaydediliyor...';
+            btn.disabled = true;
+            const slug = document.getElementById('slugInput').value;
+            const bio = document.getElementById('bioInput').value;
+            const banner = document.getElementById('bannerInput').value;
+            const result = await saveProfile(slug, bio, banner);
+            btn.textContent = result.success ? '✅ KAYDEDİLDİ!' : '❌ HATA!';
+            setTimeout(() => { btn.textContent = 'AYARLARI KAYDET'; btn.disabled = false; }, 3000);
+        });
+
+        // ─── Profili Kaydet (Ayarlar Tabı) ─────────────────────────────────
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveProfileBtn');
+            const slug = document.getElementById('slugInput').value;
+            const bio = document.getElementById('bioInput').value;
+            const banner = document.getElementById('bannerInput').value;
+            btn.textContent = 'Kaydediliyor...';
+            btn.disabled = true;
+            const result = await saveProfile(slug, bio, banner);
+            const msg = document.getElementById('saveMsg');
+            if (result.success) {
+                msg.textContent = `✅ Profil linkin: ${result.profileUrl}`;
+                msg.style.color = '#2ecc71';
+                document.getElementById('publicProfileLink').textContent = `starhub.lol/${slug}`;
+                document.getElementById('publicProfileLink').href = `/${slug}`;
+            } else {
+                msg.textContent = `❌ ${result.error}`;
+                msg.style.color = '#FF4655';
+            }
+            btn.textContent = '💾 PROFİLİ KAYDET';
+            btn.disabled = false;
+        });
+
+        // ─── Profili Düzenle Modal ────────────────────────────────────────────
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+            document.getElementById('editModal').classList.add('open');
+        });
+        document.getElementById('modalCancelBtn').addEventListener('click', () => {
+            document.getElementById('editModal').classList.remove('open');
+        });
+        document.getElementById('modalSaveBtn').addEventListener('click', async () => {
+            const slug = document.getElementById('modalSlug').value;
+            const bio = document.getElementById('modalBio').value;
+            const banner = document.getElementById('modalBanner').value;
+            const result = await saveProfile(slug, bio, banner);
+            const msg = document.getElementById('modalSaveMsg');
+            if (result.success) {
+                msg.textContent = `✅ Kaydedildi! ${result.profileUrl}`;
+                msg.style.color = '#2ecc71';
+                document.getElementById('displayBio').textContent = bio;
+                if (banner) {
+                    document.getElementById('profileBannerDisplay').style.backgroundImage = `url('${banner}')`;
+                    document.getElementById('profileBannerDisplay').style.backgroundSize = 'cover';
+                }
+                setTimeout(() => document.getElementById('editModal').classList.remove('open'), 2000);
+            } else {
+                msg.textContent = `❌ ${result.error}`;
+                msg.style.color = '#FF4655';
+            }
+        });
+
+        // ─── Rank Sync Butonu ─────────────────────────────────────────────────
+        document.getElementById('syncNowBtn').addEventListener('click', () => {
+            const btn = document.getElementById('syncNowBtn');
+            btn.textContent = 'Senkronize Ediliyor...';
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.textContent = '✅ SENKRONİZE EDİLDİ!';
+                document.getElementById('lastSyncTime').textContent = 'Az önce';
+                setTimeout(() => { btn.textContent = '🔄 ŞİMDİ SENKRONİZE ET'; btn.disabled = false; }, 3000);
+            }, 2000);
+        });
     </script>
 </body>
 </html>
