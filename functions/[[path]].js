@@ -1,40 +1,33 @@
-// Yönlendirme Fonksiyonu
-// - /dashboard.html?code=... gelirse → auth/callback.js'e devret
-// - /slug → profile.html sun
+// functions/[[path]].js
+// Bilinmeyen slug'ları (starhub.lol/siyah gibi) profile.html'e yönlendir
+// Statik dosyalara dokunma
 
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const pathname = url.pathname;
-  const code = url.searchParams.get('code');
 
-  // Dashboard'a code ile geliniyorsa OAuth callback'i çalıştır
-  if (pathname === '/dashboard.html' && code) {
-    const { onRequest: handleAuth } = await import('./auth/callback.js');
-    return handleAuth(context);
-  }
-
-  // Statik dosya/sayfaları doğrudan sun
-  const staticPaths = [
+  // Statik dosyalar ve bilinen sayfalar — doğrudan sun
+  const staticExact = [
     '/', '/index.html', '/login.html', '/dashboard.html',
     '/profile.html', '/style.css', '/logo.png', '/bg.png',
-    '/riot.txt', '/schema.sql', '/favicon.ico'
+    '/riot.txt', '/schema.sql', '/favicon.ico',
   ];
 
   if (
-    staticPaths.includes(pathname) ||
+    staticExact.includes(pathname) ||
     pathname.startsWith('/api/') ||
-    pathname.startsWith('/functions/') ||
     pathname.startsWith('/auth/') ||
-    pathname.includes('.')
+    pathname.match(/\.[a-z0-9]+$/i) // uzantılı dosyalar
   ) {
     return env.ASSETS.fetch(request);
   }
 
-  // Slug bazlı profil sayfası
+  // Slug bazlı profil sayfası: /siyah → profile.html
   const slug = pathname.replace(/^\//, '').split('/')[0];
   if (slug) {
-    return env.ASSETS.fetch(new Request(new URL('/profile.html', url).toString()));
+    const profileReq = new Request(new URL('/profile.html', url).toString(), request);
+    return env.ASSETS.fetch(profileReq);
   }
 
   return env.ASSETS.fetch(request);
