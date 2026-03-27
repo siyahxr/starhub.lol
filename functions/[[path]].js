@@ -16,11 +16,13 @@ export async function onRequest(context) {
     const error = url.searchParams.get('error');
 
     if (error || !code) {
-      return Response.redirect('https://starhub.lol/login.html?error=cancelled', 302);
+      return Response.redirect('https://starhub.lol/login?error=cancelled', 302);
     }
 
+    let access_token = null;
+
+    // ─── 1. Token Exchange ────────────────────────────────────
     try {
-      // Token exchange
       const tokenRes = await fetch(`${DISCORD_API}/oauth2/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -34,71 +36,83 @@ export async function onRequest(context) {
       });
 
       if (!tokenRes.ok) {
-        console.error('Token exchange failed:', await tokenRes.text());
-        return Response.redirect('https://starhub.lol/login.html?error=auth_failed', 302);
+        const errText = await tokenRes.text();
+        console.error('Token exchange failed:', errText);
+        return Response.redirect('https://starhub.lol/login?error=auth_failed', 302);
       }
 
-      const { access_token } = await tokenRes.json();
+      const tokenData = await tokenRes.json();
+      access_token = tokenData.access_token;
+    } catch (e) {
+      console.error('Token fetch error:', e.message);
+      return Response.redirect('https://starhub.lol/login?error=auth_failed', 302);
+    }
 
-      // Discord kullanıcı bilgileri
+    // ─── 2. Discord Kullanıcı Bilgileri ───────────────────────
+    let discordUser = null;
+    try {
       const userRes = await fetch(`${DISCORD_API}/users/@me`, {
         headers: { Authorization: `Bearer ${access_token}` },
       });
-
       if (!userRes.ok) {
-        return Response.redirect('https://starhub.lol/login.html?error=user_failed', 302);
+        return Response.redirect('https://starhub.lol/login?error=user_failed', 302);
       }
-
-      const u = await userRes.json();
-      const avatarUrl = u.avatar
-        ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256`
-        : `https://cdn.discordapp.com/embed/avatars/0.png`;
-      const username = u.global_name || u.username;
-
-      // D1'e kaydet (varsa avatar güncelle, diğer ayarlar korunur)
-      const existing = await env.DB.prepare(
-        'SELECT slug, bio, banner_url, is_public, sync_active FROM profiles WHERE user_id = ?'
-      ).bind(u.id).first();
-
-      const defaultSlug = username.toLowerCase().replace(/[^a-z0-9_-]/gi, '').slice(0, 30);
-
-      await env.DB.prepare(`
-        INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET
-          username   = excluded.username,
-          avatar_url = excluded.avatar_url
-      `).bind(
-        u.id, username,
-        existing?.slug || defaultSlug,
-        avatarUrl,
-        existing?.banner_url || '',
-        existing?.bio || '',
-        existing?.is_public ?? 1,
-        existing?.sync_active ?? 1
-      ).run();
-
-      // Session cookie (30 gün)
-      const session = JSON.stringify({
-        id:           u.id,
-        username,
-        discriminator: u.discriminator || '0',
-        avatarUrl,
-      });
-      const sessionB64 = btoa(unescape(encodeURIComponent(session)));
-
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location:    'https://starhub.lol/dashboard.html',
-          'Set-Cookie': `shub_session=${sessionB64}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`,
-        },
-      });
-
-    } catch (err) {
-      console.error('Auth error:', err.message);
-      return Response.redirect('https://starhub.lol/login.html?error=server_error', 302);
+      discordUser = await userRes.json();
+    } catch (e) {
+      console.error('User fetch error:', e.message);
+      return Response.redirect('https://starhub.lol/login?error=user_failed', 302);
     }
+
+    const userId    = discordUser.id;
+    const username  = discordUser.global_name || discordUser.username;
+    const disc      = discordUser.discriminator || '0';
+    const avatarUrl = discordUser.avatar
+      ? `https://cdn.discordapp.com/avatars/${userId}/${discordUser.avatar}.png?size=256`
+      : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+    // ─── 3. D1 Kayıt (DB yoksa atla, login yine çalışır) ─────
+    try {
+      if (env.DB) {
+        const existing = await env.DB.prepare(
+          'SELECT slug, bio, banner_url, is_public, sync_active FROM profiles WHERE user_id = ?'
+        ).bind(userId).first();
+
+        const defaultSlug = username.toLowerCase().replace(/[^a-z0-9_-]/gi, '').slice(0, 30);
+
+        await env.DB.prepare(`
+          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(user_id) DO UPDATE SET
+            username   = excluded.username,
+            avatar_url = excluded.avatar_url
+        `).bind(
+          userId, username,
+          existing?.slug || defaultSlug,
+          avatarUrl,
+          existing?.banner_url || '',
+          existing?.bio || '',
+          existing?.is_public ?? 1,
+          existing?.sync_active ?? 1
+        ).run();
+      } else {
+        console.warn('D1 binding (DB) bulunamadı — veri kaydedilmedi.');
+      }
+    } catch (dbErr) {
+      // DB hatası login'i engellemez, sadece logla
+      console.error('D1 kayıt hatası:', dbErr.message);
+    }
+
+    // ─── 4. Session Cookie ve Dashboard Yönlendirmesi ─────────
+    const session    = JSON.stringify({ id: userId, username, discriminator: disc, avatarUrl });
+    const sessionB64 = btoa(unescape(encodeURIComponent(session)));
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location:    'https://starhub.lol/dashboard.html',
+        'Set-Cookie': `shub_session=${sessionB64}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`,
+      },
+    });
   }
 
   // ══════════════════════════════════════════════════════════════
