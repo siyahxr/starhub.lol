@@ -605,10 +605,15 @@
                 content.innerHTML = template;
                 
                 if (viewName === 'Community') {
-                    // Fetch real data from Cloudflare DB
-                    fetch('/api/members').then(r => r.ok ? r.json() : []).then(data => {
-                        const community = document.getElementById('community_list_container');
-                        if (community) {
+                    const community = document.getElementById('community_list_container');
+                    if (!community) return;
+
+                    community.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem;"><i class="animate-spin" data-lucide="loader-2"></i><p style="margin-top: 1rem; color: var(--text-muted);">Summoning the collective...</p></div>';
+                    lucide.createIcons();
+
+                    fetch('/api/members')
+                        .then(r => r.ok ? r.json() : [])
+                        .then(data => {
                             if (data.length === 0) {
                                 community.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No community members found yet. Be the first!</p>';
                                 return;
@@ -630,10 +635,26 @@
                                     </div>
                                 </div>
                             `).join('');
-                        }
-                    }).catch(e => {
-                        console.error('Community fetch failed:', e);
-                    });
+                        })
+                        .catch(e => {
+                            console.error('Community fetch failed:', e);
+                            community.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--accent-primary); padding: 3rem;">Collective connection lost. Retrying...</p>';
+                        });
+                }
+
+                if (viewName === 'Dashboard') {
+                    // Auto-sync profile to DB
+                    const userData = {
+                        username: localStorage.getItem('sh_username') || 'User_' + Math.floor(Math.random() * 9000 + 1000),
+                        short_desc: localStorage.getItem('sh_short_desc') || 'Verified Creator',
+                        avatar: localStorage.getItem('sh_avatar') || '',
+                        banner: localStorage.getItem('sh_banner') || ''
+                    };
+                    fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData)
+                    }).catch(console.error);
                 }
                 
                 if (viewName === 'Media') {
