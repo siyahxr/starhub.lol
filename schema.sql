@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS profiles (
   tw_url      TEXT DEFAULT '',
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   riot_name   TEXT DEFAULT '',
-  riot_name   TEXT DEFAULT '',
   riot_tag    TEXT DEFAULT '',
   kd_ratio    REAL DEFAULT 0.0,
   win_rate    REAL DEFAULT 0.0,

@@ -118,10 +118,48 @@ def scrape_tracker(riot_id, user_id=None):
         return {"error": str(e)}
 
 if __name__ == "__main__":
-    # Usage: python valorant_scraper.py Nick#Tag [optional_user_id]
+    import time
+    import random
+
+    # Usage: python valorant_scraper.py --auto
+    # OR:    python valorant_scraper.py Nick#Tag [user_id]
+    
     if len(sys.argv) > 1:
-        riot_id = sys.argv[1]
-        user_id = sys.argv[2] if len(sys.argv) > 2 else None
-        print(json.dumps(scrape_tracker(riot_id, user_id), indent=2))
+        if sys.argv[1] == "--auto":
+            print("🚀 StarHUB Autonomous Scraper started...")
+            print(f"📡 API Base: {API_BASE}")
+            
+            while True:
+                try:
+                    print("\n🔍 Fetching player list from database...")
+                    r = requests.get(f"{API_BASE}/api/sync/list")
+                    if r.ok:
+                        players = r.json()
+                        print(f"📦 Found {len(players)} players to sync.")
+                        
+                        for p in players:
+                            riot_id = f"{p['riot_name']}#{p['riot_tag']}"
+                            user_id = p['user_id']
+                            
+                            print(f"\n⚡ Syncing: {riot_id} ({p['username']})")
+                            scrape_tracker(riot_id, user_id)
+                            
+                            # Anti-ban delay
+                            delay = random.randint(30, 60)
+                            print(f"⏳ Sleeping {delay}s to avoid Tracker.gg bans...")
+                            time.sleep(delay)
+                    else:
+                        print(f"❌ Could not fetch player list: {r.status_code}")
+                except Exception as e:
+                    print(f"🚨 Loop Error: {str(e)}")
+                
+                print("\n🏁 Full cycle complete. Waiting 10 minutes before next sync...")
+                time.sleep(600) # 10 minutes
+        else:
+            riot_id = sys.argv[1]
+            user_id = sys.argv[2] if len(sys.argv) > 2 else None
+            print(json.dumps(scrape_tracker(riot_id, user_id), indent=2))
     else:
-        print("Usage: python valorant_scraper.py Nick#Tag [user_id]")
+        print("Usage:")
+        print("  Auto Sync: python valorant_scraper.py --auto")
+        print("  Manual:    python valorant_scraper.py Nick#Tag [user_id]")

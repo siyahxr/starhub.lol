@@ -499,6 +499,25 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
+  // 7. SYNC PLAYER LIST API  →  /api/sync/list
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/sync/list') {
+    const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
+    try {
+      // Sadece Riot hesabı olanları getir
+      const players = await env.DB.prepare(`
+        SELECT user_id, username, riot_name, riot_tag 
+        FROM profiles 
+        WHERE riot_name != '' AND riot_name IS NOT NULL
+      `).all();
+
+      return new Response(JSON.stringify(players.results), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
   // 7. STATİK DOSYALAR
   // ══════════════════════════════════════════════════════════════
   // ══════════════════════════════════════════════════════════════

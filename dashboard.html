@@ -482,8 +482,18 @@
                                 </div>
                             </div>
 
-                            <!-- SOSYAL MEDYA LİNKLRİ -->
+                            <!-- VALORANT AYARLARI -->
                             <div style="margin-top: 3rem; border-top: 1px solid var(--glass-border); padding-top: 3rem;">
+                                <h4 style="font-size: 1.1rem; font-weight: 950; letter-spacing: 1px; margin-bottom: 2rem;">🏆 REKABETÇİ AYARLARI</h4>
+                                <div class="form-group" style="margin-bottom: 2rem;">
+                                    <label>VALORANT ID (NICK#TAG)</label>
+                                    <input type="text" id="riotIdInput" placeholder="Siyah#STA" class="dash-input" style="border: 1px solid var(--accent-teal);">
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: 700;">* Bu bilgi, istatistiklerinizi otomatik güncellemek için kullanılır.</p>
+                                </div>
+                            </div>
+
+                            <!-- SOSYAL MEDYA LİNKLRİ -->
+                            <div style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 3rem;">
                                 <h4 style="font-size: 1.1rem; font-weight: 950; letter-spacing: 1px; margin-bottom: 2rem;">🔗 SOSYAL MEDYA LİNKLRİ</h4>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                                     <div class="form-group">
@@ -853,6 +863,11 @@
         if (p.tk_url) document.getElementById('tkUrlInput').value = p.tk_url;
         if (p.tw_url) document.getElementById('twUrlInput').value = p.tw_url;
         if (p.dc_id)  document.getElementById('dcIdInput').value  = p.dc_id;
+
+        // Valorant ID Doldur
+        if (p.riot_name && p.riot_tag) {
+            document.getElementById('riotIdInput').value = `${p.riot_name}#${p.riot_tag}`;
+        }
     }
 
     // ─── ImgBB Yükleme ────────────────────────────────────────
@@ -959,6 +974,8 @@
             tk_url: document.getElementById('tkUrlInput').value || '',
             tw_url: document.getElementById('twUrlInput').value || '',
             dc_id:  document.getElementById('dcIdInput').value  || '',
+            riot_name: document.getElementById('riotIdInput')?.value.split('#')[0] || '',
+            riot_tag:  document.getElementById('riotIdInput')?.value.split('#')[1] || '',
         };
 
         const res = await fetch('/api/profile', {
