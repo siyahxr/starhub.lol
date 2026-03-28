@@ -410,7 +410,7 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 4. VALORANT CANLI STATS API  →  /api/valorant/stats
+  // 4. VALORANT CANLI STATS API  →  /api/valorant/stats (HYBRID ENGINE)
   // ══════════════════════════════════════════════════════════════
   if (pathname === '/api/valorant/stats') {
     const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
@@ -421,50 +421,93 @@ export async function onRequest(context) {
       const profile = await env.DB.prepare('SELECT riot_name, riot_tag FROM profiles WHERE user_id = ?').bind(userId).first();
       if (!profile || !profile.riot_name) return new Response(JSON.stringify({ error: 'Riot hesabı bağlı değil' }), { status: 404, headers: corsHeaders });
 
+      const name = profile.riot_name;
+      const tag = profile.riot_tag;
       const riotKey = env.RIOT_API_KEY;
-      const headers = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
 
-      // 1. PUUID Al
-      const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${profile.riot_name}/${profile.riot_tag}`, { headers });
-      if (!accRes.ok) throw new Error('Hesap bulunamadı');
-      const { puuid } = await accRes.json();
-
-      // 2. Rank Al
       let rank = 'Unranked';
-      const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers });
-      if (rankRes.ok) {
-        const rData = await rankRes.json();
-        rank = rData.tierName || 'Unranked';
-      }
-
-      // 3. Match History (Son 3 Maç)
-      const matchHistoryRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matchlists/by-puuid/${puuid}?endIndex=3`, { headers });
       let matches = [];
-      if (matchHistoryRes.ok) {
-        const historyData = await matchHistoryRes.json();
-        for (const m of historyData.history || []) {
-          const detailRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matches/${m.matchId}`, { headers });
-          if (detailRes.ok) {
-            const detail = await detailRes.json();
-            const player = detail.players.find(p => p.puuid === puuid);
-            const team = detail.teams.find(t => t.teamId === player.teamId);
-            matches.push({
-                matchId: m.matchId,
-                map: detail.matchInfo.mapId.split('/').pop(),
-                mode: detail.matchInfo.queueId || 'Unrated',
-                agent: player.characterId,
-                kills: player.stats.kills,
-                deaths: player.stats.deaths,
-                assists: player.stats.assists,
-                win: team ? team.won : false
-            });
+
+      // ─── ADIM 1: RESMİ RIOT API (İLK DENEME) ─────────────────────
+      try {
+        const headers = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
+        
+        // PUUID
+        const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${name}/${tag}`, { headers });
+        if (accRes.ok) {
+          const { puuid } = await accRes.json();
+          
+          // RANK
+          const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers });
+          if (rankRes.ok) {
+            const rData = await rankRes.json();
+            rank = rData.tierName || 'Unranked';
+          }
+
+          // MATCHES
+          const histRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matchlists/by-puuid/${puuid}?endIndex=3`, { headers });
+          if (histRes.ok) {
+            const histData = await histRes.json();
+            for (const m of histData.history || []) {
+              const detRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matches/${m.matchId}`, { headers });
+              if (detRes.ok) {
+                const det = await detRes.json();
+                const player = det.players.find(p => p.puuid === puuid);
+                matches.push({
+                    matchId: m.matchId,
+                    map: det.matchInfo.mapId.split('/').pop(),
+                    agent: player.characterId,
+                    kills: player.stats.kills,
+                    deaths: player.stats.deaths,
+                    assists: player.stats.assists,
+                    win: det.teams.find(t => t.teamId === player.teamId)?.won || false,
+                    mode: det.matchInfo.queueId || 'Unrated'
+                });
+              }
+            }
           }
         }
+      } catch (err) {
+        console.warn('Resmi API hata verdi, yedeğe (Henrik) geçiliyor:', err.message);
+      }
+
+      // ─── ADIM 2: YEDEK SISTEM (HENRIKDEV) ────────────────────────
+      // Eğer resmi API'den maç bilgisi gelmediyse veya rütbe boşsa, yedeğe sor:
+      if (matches.length === 0 || rank === 'Unranked') {
+        try {
+          // Rank Yedeği
+          const hRankRes = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`);
+          if (hRankRes.ok) {
+            const hRankData = await hRankRes.json();
+            if (hRankData.data?.currenttierpatched) rank = hRankData.data.currenttierpatched;
+          }
+
+          // Maç Yedeği
+          if (matches.length === 0) {
+            const hMatchRes = await fetch(`https://api.henrikdev.xyz/valorant/v3/matches/eu/${name}/${tag}?size=3`);
+            if (hMatchRes.ok) {
+              const hMatchData = await hMatchRes.json();
+              matches = (hMatchData.data || []).map(m => {
+                const me = m.players.all_players.find(p => p.name.toLowerCase() === name.toLowerCase());
+                return {
+                  matchId: m.metadata.matchid,
+                  map: m.metadata.map,
+                  agent: me.assets.agent.small, // Henrik'ten gelirse direkt resim URL'si olarak kullanırız
+                  kills: me.stats.kills,
+                  deaths: me.stats.deaths,
+                  assists: me.stats.assists,
+                  win: m.teams[me.team.toLowerCase()].has_won,
+                  mode: m.metadata.mode
+                };
+              });
+            }
+          }
+        } catch (hErr) { console.error('Yedek sistem de başarısız:', hErr.message); }
       }
 
       return new Response(JSON.stringify({
-        riot_name: profile.riot_name,
-        riot_tag: profile.riot_tag,
+        riot_name: name,
+        riot_tag: tag,
         rank: rank,
         matches: matches
       }), { headers: corsHeaders });
@@ -475,7 +518,7 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 4. STATİK DOSYALAR — doğrudan sun
+  // 5. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
     '/', '/index.html', '/login.html', '/login', '/dashboard.html',
@@ -502,7 +545,7 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 4. SLUG BAZLI PROFİL SAYFASI  →  /siyah → profile.html
+  // 6. SLUG BAZLI PROFİL SAYFASI  →  /siyah → profile.html
   // ══════════════════════════════════════════════════════════════
   const slug = pathname.replace(/^\//, '').split('/')[0];
   if (slug) {
