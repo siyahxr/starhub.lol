@@ -166,12 +166,37 @@ export async function onRequest(context) {
           }
         }
 
-        // Mevcut değerleri koru eğer yeni değer gönderilmediyse
-        const current = await env.DB.prepare('SELECT * FROM profiles WHERE user_id = ?').bind(user_id).first();
+        // ─── Resmi Riot API Senkronizasyonu ──────────────────────────
+        let r_name = riot_name || current?.riot_name || '';
+        let r_tag  = riot_tag  || current?.riot_tag  || '';
+        let currentRank = current?.rank_name || 'Unranked';
+        let currentRR = current?.rank_rr || 0;
+
+        if (r_name && r_tag) {
+          const riotKey = env.RIOT_API_KEY;
+          const riotHeaders = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
+
+          try {
+            const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${r_name}/${r_tag}`, { headers: riotHeaders });
+            if (accRes.ok) {
+              const accData = await accRes.json();
+              const puuid = accData.puuid;
+              const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers: riotHeaders });
+              if (rankRes.ok) {
+                const rankData = await rankRes.json();
+                currentRank = rankData.tierName || 'Unranked';
+                currentRR = rankData.rankedRating || 0;
+              } else if (rankRes.status === 404) {
+                currentRank = 'Henüz dereceli maçı yok';
+                currentRR = 0;
+              }
+            }
+          } catch (e) { console.error('Riot Profile Sync fail:', e.message); }
+        }
 
         await env.DB.prepare(`
-          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url, riot_name, riot_tag)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url, riot_name, riot_tag, rank_name, rank_rr)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             username   = excluded.username,
             slug       = excluded.slug,
@@ -186,7 +211,9 @@ export async function onRequest(context) {
             dc_id       = excluded.dc_id,
             tw_url      = excluded.tw_url,
             riot_name   = excluded.riot_name,
-            riot_tag    = excluded.riot_tag
+            riot_tag    = excluded.riot_tag,
+            rank_name   = excluded.rank_name,
+            rank_rr     = excluded.rank_rr
         `).bind(
           user_id, username,
           slug || current?.slug || username.toLowerCase().replace(/[^a-z0-9_-]/gi, ''),
@@ -200,8 +227,8 @@ export async function onRequest(context) {
           tk_url      ?? current?.tk_url      ?? '',
           dc_id       ?? current?.dc_id       ?? '',
           tw_url      ?? current?.tw_url      ?? '',
-          riot_name   ?? current?.riot_name   ?? '',
-          riot_tag    ?? current?.riot_tag    ?? ''
+          r_name, r_tag,
+          currentRank, currentRR
         ).run();
 
         const finalSlug = slug || current?.slug || username;
@@ -334,20 +361,38 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: 'Eksik bilgi!' }), { status: 400, headers: corsHeaders });
       }
 
-      // Rank Güncelleme (HenrikDev API)
+      // ─── Resmi Riot API Senkronizasyonu ──────────────────────────
       let currentRank = 'Unranked';
       let currentRR = 0;
+      
       if (riot_name && riot_tag) {
+        const riotKey = env.RIOT_API_KEY; // Cloudflare Secret'tan al
+        const riotHeaders = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
+
         try {
-          const valRes = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${riot_name}/${riot_tag}`, {
-            headers: { 'Accept': 'application/json' }
-          });
-          if (valRes.ok) {
-            const valData = await valRes.json();
-            currentRank = valData.data?.currenttierpatched || 'Unranked';
-            currentRR = valData.data?.ranking_in_tier || 0;
+          // 1. ADIM: PUUID'yi AL (Europe Endpoint)
+          const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${riot_name}/${riot_tag}`, { headers: riotHeaders });
+          
+          if (accRes.ok) {
+            const accData = await accRes.json();
+            const puuid = accData.puuid;
+
+            // 2. ADIM: RANK'I ÇEK (TR Endpoint - User Request Base)
+            // Not: Resmi VAL-RANKED-V1 genellikle leaderboard tabanlıdır, ancak istenen endpoint'e istek atıyoruz.
+            const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers: riotHeaders });
+            
+            if (rankRes.ok) {
+              const rankData = await rankRes.json();
+              currentRank = rankData.tierName || 'Unranked';
+              currentRR = rankData.rankedRating || 0;
+            } else if (rankRes.status === 404) {
+              currentRank = 'Henüz dereceli maçı yok';
+            }
           }
-        } catch (e) { console.error('Rank sync failed:', e.message); }
+        } catch (e) { 
+          console.error('Official Riot API Sync fail:', e.message); 
+          currentRank = 'API Hatası';
+        }
       }
 
       // DB Güncelle ve İlan Ekle
