@@ -152,7 +152,7 @@ export async function onRequest(context) {
     if (request.method === 'POST') {
       try {
         const body = await request.json();
-        const { user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url } = body;
+        const { user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url, riot_name, riot_tag } = body;
 
         if (!user_id || !username) {
           return new Response(JSON.stringify({ error: 'user_id ve username gerekli' }), { status: 400, headers: corsHeaders });
@@ -170,8 +170,8 @@ export async function onRequest(context) {
         const current = await env.DB.prepare('SELECT * FROM profiles WHERE user_id = ?').bind(user_id).first();
 
         await env.DB.prepare(`
-          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url, riot_name, riot_tag)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             username   = excluded.username,
             slug       = excluded.slug,
@@ -184,7 +184,9 @@ export async function onRequest(context) {
             ig_url      = excluded.ig_url,
             tk_url      = excluded.tk_url,
             dc_id       = excluded.dc_id,
-            tw_url      = excluded.tw_url
+            tw_url      = excluded.tw_url,
+            riot_name   = excluded.riot_name,
+            riot_tag    = excluded.riot_tag
         `).bind(
           user_id, username,
           slug || current?.slug || username.toLowerCase().replace(/[^a-z0-9_-]/gi, ''),
@@ -197,7 +199,9 @@ export async function onRequest(context) {
           ig_url      ?? current?.ig_url      ?? '',
           tk_url      ?? current?.tk_url      ?? '',
           dc_id       ?? current?.dc_id       ?? '',
-          tw_url      ?? current?.tw_url      ?? ''
+          tw_url      ?? current?.tw_url      ?? '',
+          riot_name   ?? current?.riot_name   ?? '',
+          riot_tag    ?? current?.riot_tag    ?? ''
         ).run();
 
         const finalSlug = slug || current?.slug || username;

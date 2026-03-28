@@ -142,17 +142,40 @@
                     // Dashboard yönlendirmesi
                     window.location.href = '/dashboard.html#riot_login';
                 } else {
-                    errorMsg.textContent = 'Hesap bulunamadı!';
+                    errorMsg.innerHTML = `Hesap bulunamadı! Eğer bilgilerden eminsen:<br><button type="button" onclick="forceRiotLogin('${name}', '${tag}')" style="background:none; border:none; color:#ff4655; cursor:pointer; font-weight:900; text-decoration:underline; margin-top:5px; font-size: 0.7rem;">YİNE DE GİRİŞ YAP</button>`;
                     errorMsg.style.display = 'block';
                 }
             } catch (err) {
-                errorMsg.textContent = 'API hatası oluştu.';
+                errorMsg.innerHTML = `API hatası! Eğer bilgilerden eminsen:<br><button type="button" onclick="forceRiotLogin('${name}', '${tag}')" style="background:none; border:none; color:#ff4655; cursor:pointer; font-weight:900; text-decoration:underline; margin-top:5px; font-size: 0.7rem;">YÜKLENMEDEN GİRİŞ YAP</button>`;
                 errorMsg.style.display = 'block';
             } finally {
                 btnLogin.textContent = 'GİRİŞ';
                 btnLogin.disabled = false;
             }
         });
+
+        // "Yine de Gir" fonksiyonu - API beklemeden oturumu açar
+        window.forceRiotLogin = (name, tag) => {
+            const sessionData = {
+                id: `riot_${name.toLowerCase()}_${tag.toLowerCase()}`,
+                username: name,
+                avatarUrl: '/logo.png',
+                riot_name: name,
+                riot_tag: tag,
+                region: 'eu',
+                is_riot_login: true,
+                forced: true // Dashboard'a bu oturumun zorla açıldığını söyler (sync denemesi için)
+            };
+
+            const sessionStr = JSON.stringify(sessionData);
+            localStorage.setItem('shub_user', sessionStr);
+            
+            // Cookie SET (30 Gün)
+            const sessionB64 = btoa(unescape(encodeURIComponent(sessionStr)));
+            document.cookie = `shub_session=${sessionB64}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`;
+
+            window.location.href = '/dashboard.html#riot_login';
+        };
     </script>
 </body>
 </html>
