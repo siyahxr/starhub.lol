@@ -113,18 +113,19 @@
             errorMsg.style.display = 'none';
 
             try {
-                // Riot hesabını doğrula
-                const res = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`);
+                // Riot hesabını doğrula (Account API ile en sağlam kontrol)
+                const res = await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${name}/${tag}`);
                 if (res.ok) {
-                    const data = await res.json();
+                    const apiData = await res.json();
                     
-                    // Session objesi oluştur (Discord yerine Riot ID bazlı)
+                    // Session objesi oluştur (Unique PUUID kullanarak)
                     const sessionData = {
-                        id: `riot_${data.data.puuid || name.toLowerCase()}`, // PUUID bazlı unique ID
-                        username: name,
-                        avatarUrl: '/logo.png', // Riot login'de avatar Discord'dan gelmez
-                        riot_name: name,
-                        riot_tag: tag,
+                        id: `riot_${apiData.data.puuid}`,
+                        username: apiData.data.name,
+                        avatarUrl: apiData.data.card ? apiData.data.card.small : '/logo.png',
+                        riot_name: apiData.data.name,
+                        riot_tag: apiData.data.tag,
+                        region: apiData.data.region || 'eu',
                         is_riot_login: true
                     };
 
@@ -138,10 +139,10 @@
                     expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
                     document.cookie = `shub_session=${sessionB64}; Path=/; Expires=${expires.toUTCString()}; SameSite=Lax; Secure`;
 
-                    // Dashboard yönlendirmesi (Hash olarak taşıyalım ki anlasın)
+                    // Dashboard yönlendirmesi
                     window.location.href = '/dashboard.html#riot_login';
                 } else {
-                    errorMsg.textContent = 'Hesap bulunamadı veya gizli!';
+                    errorMsg.textContent = 'Hesap bulunamadı!';
                     errorMsg.style.display = 'block';
                 }
             } catch (err) {
