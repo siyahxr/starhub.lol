@@ -1125,61 +1125,60 @@
         const content = document.getElementById('statsContent');
         
         try {
-            // Profil verisinden Nick#Tag al
-            const profRes = await fetch(`/api/profile?user_id=${session.id}`);
-            const profile = await profRes.json();
-            
-            if (!profile.riot_name || !profile.riot_tag) {
-                loader.innerHTML = `
-                    <p style="margin-bottom: 1.5rem;">İstatistikleri görmek için Riot ID'ni bağlaman gerekiyor.</p>
-                    <button class="edit-profile-btn" onclick="document.querySelector('[data-tab=settings]').click()">⚙️ AYARLARDAN BAĞLA</button>
-                `;
-                return;
-            }
-
             loader.style.display = 'block';
             content.style.display = 'none';
 
-            // HenrikDev API üzerinden maç hikayesi (Proxy üzerinden veya doğrudan FETCh)
-            // Bu kısım Henrik v3 matches endpointini kullanır
-            const matchRes = await fetch(`https://api.henrikdev.xyz/valorant/v3/matches/eu/${profile.riot_name}/${profile.riot_tag}?size=3`);
-            if (matchRes.ok) {
-                const matchData = await matchRes.json();
-                renderMatches(matchData.data, profile.riot_name, profile.riot_tag);
+            const res = await fetch(`/api/valorant/stats?user_id=${session.id}`);
+            if (res.ok) {
+                const data = await res.json();
                 
                 // Rank bilgilerini güncelle
-                document.getElementById('statsRankIcon').src = profile.rank_icon || `https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${profile.rank_name.toLowerCase().replace(' ', '')}.png`;
-                document.getElementById('statsRankName').textContent = profile.rank_name;
-                document.getElementById('statsRankRR').textContent = `${profile.rank_rr} RR`;
+                document.getElementById('statsRankName').textContent = data.rank;
+                document.getElementById('statsRankRR').textContent = "Canlı Veri";
+                
+                const rankSlug = data.rank.toLowerCase().replace(/ /g, '');
+                document.getElementById('statsRankIcon').src = `https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${rankSlug}.png`;
+                
+                renderMatches(data.matches);
                 
                 loader.style.display = 'none';
                 content.style.display = 'block';
+            } else {
+                throw new Error('API Bağlantı Hatası');
             }
         } catch (e) {
-            loader.textContent = 'Bilgiler yüklenirken hata oluştu.';
+            loader.innerHTML = `
+                <p style="margin-bottom: 1rem; color: #ff4655;">Hata: ${e.message}</p>
+                <p style="font-size: 0.8rem; opacity: 0.6;">Eğer Riot ID bağlı değilse lütfen ayarlardan bağlayın.</p>
+                <button class="edit-profile-btn" onclick="document.querySelector('[data-tab=settings]').click()">⚙️ AYARLARA GİT</button>
+            `;
         }
     }
 
-    function renderMatches(matches, name, tag) {
+    function renderMatches(matches) {
         const list = document.getElementById('lastMatchesList');
+        if (!matches || matches.length === 0) {
+            list.innerHTML = '<p style="text-align: center; opacity: 0.5; padding: 2rem;">Henüz kaydedilmiş maç verisi yok.</p>';
+            return;
+        }
+
         list.innerHTML = matches.map(m => {
-            const me = m.players.all_players.find(p => p.name.toLowerCase() === name.toLowerCase());
-            const win = m.teams[me.team.toLowerCase()].has_won;
-            const resultColor = win ? '#2ecc71' : '#ff4655';
-            const kda = `${me.stats.kills}/${me.stats.deaths}/${me.stats.assists}`;
+            const resultColor = m.win ? '#2ecc71' : '#ff4655';
+            const kda = `${m.kills}/${m.deaths}/${m.assists}`;
+            const agentIcon = `https://media.valorant-api.com/agents/${m.agent}/displayicon.png`;
             
             return `
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 1rem 1.5rem; border-radius: 15px; display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <img src="${me.assets.agent.small}" style="width: 40px; border-radius: 10px; border: 1px solid ${resultColor}">
+                        <img src="${agentIcon}" style="width: 40px; border-radius: 10px; border: 1px solid ${resultColor}" onerror="this.src='/logo.png'">
                         <div>
-                            <div style="font-weight: 900; font-size: 0.9rem;">${m.metadata.map}</div>
-                            <span style="font-size: 0.7rem; font-weight: 800; color: ${resultColor}">${win ? 'WIN' : 'LOSS'}</span>
+                            <div style="font-weight: 900; font-size: 0.9rem; text-transform: uppercase;">${m.map}</div>
+                            <span style="font-size: 0.7rem; font-weight: 800; color: ${resultColor}">${m.win ? 'WIN' : 'LOSS'} • ${m.mode}</span>
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-weight: 950; font-size: 1rem;">${kda}</div>
-                        <span style="font-size: 0.7rem; color: var(--text-secondary);">KDA SCORE</span>
+                        <div style="font-weight: 950; font-size: 1.1rem; letter-spacing: 1px;">${kda}</div>
+                        <span style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 800;">KDA SCORE</span>
                     </div>
                 </div>
             `;

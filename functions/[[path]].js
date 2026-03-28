@@ -410,6 +410,71 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
+  // 4. VALORANT CANLI STATS API  →  /api/valorant/stats
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/valorant/stats') {
+    const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
+    const userId = url.searchParams.get('user_id');
+    if (!userId) return new Response(JSON.stringify({ error: 'user_id gerekli' }), { status: 400, headers: corsHeaders });
+
+    try {
+      const profile = await env.DB.prepare('SELECT riot_name, riot_tag FROM profiles WHERE user_id = ?').bind(userId).first();
+      if (!profile || !profile.riot_name) return new Response(JSON.stringify({ error: 'Riot hesabı bağlı değil' }), { status: 404, headers: corsHeaders });
+
+      const riotKey = env.RIOT_API_KEY;
+      const headers = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
+
+      // 1. PUUID Al
+      const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${profile.riot_name}/${profile.riot_tag}`, { headers });
+      if (!accRes.ok) throw new Error('Hesap bulunamadı');
+      const { puuid } = await accRes.json();
+
+      // 2. Rank Al
+      let rank = 'Unranked';
+      const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers });
+      if (rankRes.ok) {
+        const rData = await rankRes.json();
+        rank = rData.tierName || 'Unranked';
+      }
+
+      // 3. Match History (Son 3 Maç)
+      const matchHistoryRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matchlists/by-puuid/${puuid}?endIndex=3`, { headers });
+      let matches = [];
+      if (matchHistoryRes.ok) {
+        const historyData = await matchHistoryRes.json();
+        for (const m of historyData.history || []) {
+          const detailRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matches/${m.matchId}`, { headers });
+          if (detailRes.ok) {
+            const detail = await detailRes.json();
+            const player = detail.players.find(p => p.puuid === puuid);
+            const team = detail.teams.find(t => t.teamId === player.teamId);
+            matches.push({
+                matchId: m.matchId,
+                map: detail.matchInfo.mapId.split('/').pop(),
+                mode: detail.matchInfo.queueId || 'Unrated',
+                agent: player.characterId,
+                kills: player.stats.kills,
+                deaths: player.stats.deaths,
+                assists: player.stats.assists,
+                win: team ? team.won : false
+            });
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({
+        riot_name: profile.riot_name,
+        riot_tag: profile.riot_tag,
+        rank: rank,
+        matches: matches
+      }), { headers: corsHeaders });
+
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
   // 4. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
