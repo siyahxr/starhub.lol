@@ -158,6 +158,8 @@ export async function onRequest(context) {
           return new Response(JSON.stringify({ error: 'user_id ve username gerekli' }), { status: 400, headers: corsHeaders });
         }
 
+        const current = await env.DB.prepare('SELECT * FROM profiles WHERE user_id = ?').bind(user_id).first();
+
         // Slug çakışma kontrolü
         if (slug) {
           const ex = await env.DB.prepare('SELECT user_id FROM profiles WHERE slug = ?').bind(slug).first();
