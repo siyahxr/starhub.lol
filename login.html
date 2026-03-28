@@ -99,7 +99,7 @@
             riotIdInput.focus();
         });
 
-        btnLogin.addEventListener('click', async () => {
+        btnLogin.addEventListener('click', () => {
             const valId = riotIdInput.value.trim();
             if (!valId.includes('#')) {
                 errorMsg.textContent = 'Format: Nick#Tag olmalı!';
@@ -108,54 +108,8 @@
             }
 
             const [name, tag] = valId.split('#');
-            btnLogin.textContent = '...';
-            btnLogin.disabled = true;
-            errorMsg.style.display = 'none';
-
-            try {
-                // Riot hesabını doğrula (Account API ile en sağlam kontrol)
-                const res = await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${name}/${tag}`);
-                if (res.ok) {
-                    const apiData = await res.json();
-                    
-                    // Session objesi oluştur (Unique PUUID kullanarak)
-                    const sessionData = {
-                        id: `riot_${apiData.data.puuid}`,
-                        username: apiData.data.name,
-                        avatarUrl: apiData.data.card ? apiData.data.card.small : '/logo.png',
-                        riot_name: apiData.data.name,
-                        riot_tag: apiData.data.tag,
-                        region: apiData.data.region || 'eu',
-                        is_riot_login: true
-                    };
-
-                    // LocalStorage ve Cookie'ye kaydet
-                    const sessionStr = JSON.stringify(sessionData);
-                    localStorage.setItem('shub_user', sessionStr);
-                    
-                    // Kalıcı Cookie Ayarla (30 Gün)
-                    const sessionB64 = btoa(unescape(encodeURIComponent(sessionStr)));
-                    const expires = new Date();
-                    expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
-                    document.cookie = `shub_session=${sessionB64}; Path=/; Expires=${expires.toUTCString()}; SameSite=Lax; Secure`;
-
-                    // Dashboard yönlendirmesi
-                    window.location.href = '/dashboard.html#riot_login';
-                } else {
-                    errorMsg.innerHTML = `Hesap bulunamadı! Eğer bilgilerden eminsen:<br><button type="button" onclick="forceRiotLogin('${name}', '${tag}')" style="background:none; border:none; color:#ff4655; cursor:pointer; font-weight:900; text-decoration:underline; margin-top:5px; font-size: 0.7rem;">YİNE DE GİRİŞ YAP</button>`;
-                    errorMsg.style.display = 'block';
-                }
-            } catch (err) {
-                errorMsg.innerHTML = `API hatası! Eğer bilgilerden eminsen:<br><button type="button" onclick="forceRiotLogin('${name}', '${tag}')" style="background:none; border:none; color:#ff4655; cursor:pointer; font-weight:900; text-decoration:underline; margin-top:5px; font-size: 0.7rem;">YÜKLENMEDEN GİRİŞ YAP</button>`;
-                errorMsg.style.display = 'block';
-            } finally {
-                btnLogin.textContent = 'GİRİŞ';
-                btnLogin.disabled = false;
-            }
-        });
-
-        // "Yine de Gir" fonksiyonu - API beklemeden oturumu açar
-        window.forceRiotLogin = (name, tag) => {
+            
+            // ANLIK OTURUM OLUŞTURULUYOR (Doğrulama Engelini Kaldırdık)
             const sessionData = {
                 id: `riot_${name.toLowerCase()}_${tag.toLowerCase()}`,
                 username: name,
@@ -163,8 +117,7 @@
                 riot_name: name,
                 riot_tag: tag,
                 region: 'eu',
-                is_riot_login: true,
-                forced: true // Dashboard'a bu oturumun zorla açıldığını söyler (sync denemesi için)
+                is_riot_login: true
             };
 
             const sessionStr = JSON.stringify(sessionData);
@@ -172,10 +125,14 @@
             
             // Cookie SET (30 Gün)
             const sessionB64 = btoa(unescape(encodeURIComponent(sessionStr)));
-            document.cookie = `shub_session=${sessionB64}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`;
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
+            document.cookie = `shub_session=${sessionB64}; Path=/; Expires=${expires.toUTCString()}; SameSite=Lax; Secure`;
 
+            // Yönlendir
+            btnLogin.textContent = 'GİRİŞ YAPILIYOR...';
             window.location.href = '/dashboard.html#riot_login';
-        };
+        });
     </script>
 </body>
 </html>
