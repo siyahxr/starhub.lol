@@ -1,23 +1,48 @@
 import cloudscraper
 from bs4 import BeautifulSoup
-import re
 import json
 import sys
+import re
 
-def scrape_valorant_stats(riot_id):
+# --- CONFIGURATION ---
+API_BASE = "https://starhub.lol" # Change to your domain
+
+def sync_to_api(user_id, data):
     """
-    Scrapes Valorant statistics from Tracker.gg for a given Riot ID (name#tag).
-    Returns a dictionary of stats or an error message.
+    Sends scraped data to StarHUB API
+    """
+    import requests
+    url = f"{API_BASE}/api/stats/update"
+    payload = {
+        "user_id": user_id,
+        "kd": data['kd'],
+        "win_rate": data['win_rate'],
+        "hs_rate": data['hs_rate'],
+        "rank_numeric": data['rank_numeric'],
+        "top_agents": data['top_agents']
+    }
+    try:
+        r = requests.post(url, json=payload)
+        if r.ok:
+            print(f"✅ Success: Synced {user_id} to StarHUB.")
+        else:
+            print(f"❌ Error {r.status_code}: {r.text}")
+    except Exception as e:
+        print(f"❌ Sync Failed: {str(e)}")
+
+def scrape_tracker(riot_id, user_id=None):
+    """
+    Scrapes Valorant stats from tracker.gg
+    Format: Nick#Tag
     """
     try:
-        # 1. Prepare the URL
         if '#' not in riot_id:
-            return {"error": "Invalid Riot ID format. Use Name#Tag."}
+            return {"error": "Invalid Riot ID format. Use Nick#Tag"}
         
         name, tag = riot_id.split('#')
         url = f"https://tracker.gg/valorant/profile/riot/{name}%23{tag}/overview"
         
-        # 2. Setup Scraper (Bypass Cloudflare)
+        # Use cloudscraper to bypass Cloudflare
         scraper = cloudscraper.create_scraper(
             browser={
                 'browser': 'chrome',
@@ -26,71 +51,77 @@ def scrape_valorant_stats(riot_id):
             }
         )
         
-        # 3. Fetch Data
         response = scraper.get(url)
-        
         if response.status_code == 404:
-            return {"error": "Player not found. Check Name#Tag and ensure profile is public."}
-        
-        if "This profile is private" in response.text:
-            return {"error": "This profile is private. Please sign in to Tracker.gg and make it public."}
-        
+            return {"error": "Profile not found or private."}
+        if response.status_code != 200:
+            return {"error": f"Tracker.gg returned status {response.status_code}"}
+
         soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # 1. Rank Extraction
+        rank_div = soup.select_one('.valorant-ranked-bg .rank-name')
+        rank_text = rank_div.get_text(strip=True) if rank_div else "Unranked"
+        
+        # 2. Key Stats (K/D, Win%, HS%)
+        stats = {}
+        main_stats = soup.select('.main-stats .stat')
+        for stat in main_stats:
+            val_el = stat.select_one('.value')
+            name_el = stat.select_one('.name')
+            if val_el and name_el:
+                label = name_el.get_text(strip=True).lower()
+                value = val_el.get_text(strip=True)
+                stats[label] = value
 
-        # 4. Parse Stats
-        stats = {
-            "riot_id": riot_id,
-            "rank": "Unranked",
-            "rank_numeric": 0,
-            "kd_ratio": 0.0,
-            "win_rate": 0.0,
-            "hs_rate": 0.0,
-            "top_agents": []
+        # 3. Top 3 Agents
+        agents = []
+        agent_rows = soup.select('.top-agents__agent')[:3]
+        for row in agent_rows:
+            agent_name = row.select_one('.name').get_text(strip=True)
+            agents.append(agent_name)
+
+        # 4. Numeric Rank Mapping
+        rank_map = {
+            "Iron": 1, "Bronze": 4, "Silver": 7, "Gold": 10, 
+            "Platinum": 13, "Diamond": 16, "Ascendant": 19, 
+            "Immortal": 22, "Radiant": 25, "Unranked": 0
         }
+        
+        base_rank = rank_text.split(' ')[0] if ' ' in rank_text else rank_text
+        tier = 1
+        matches = re.search(r' (\d)', rank_text)
+        if matches:
+            tier = int(matches.group(1))
+        
+        rank_numeric = rank_map.get(base_rank, 0)
+        if rank_numeric > 0 and base_rank != "Radiant":
+            rank_numeric += (tier - 1)
 
-        # --- RANK ---
-        rank_val = soup.select_one('.rank-name')
-        if rank_val:
-            stats["rank"] = rank_val.get_text(strip=True)
-            # Numeric mapping (simplification)
-            rank_map = {
-                "Iron 1": 1, "Iron 2": 2, "Iron 3": 3,
-                "Bronze 1": 4, "Bronze 2": 5, "Bronze 3": 6,
-                "Silver 1": 7, "Silver 2": 8, "Silver 3": 9,
-                "Gold 1": 10, "Gold 2": 11, "Gold 3": 12,
-                "Platinum 1": 13, "Platinum 2": 14, "Platinum 3": 15,
-                "Diamond 1": 16, "Diamond 2": 17, "Diamond 3": 18,
-                "Ascendant 1": 19, "Ascendant 2": 20, "Ascendant 3": 21,
-                "Immortal 1": 22, "Immortal 2": 23, "Immortal 3": 24,
-                "Radiant": 25
-            }
-            stats["rank_numeric"] = rank_map.get(stats["rank"], 0)
+        result = {
+            "riot_id": riot_id,
+            "rank": rank_text,
+            "rank_numeric": rank_numeric,
+            "kd": stats.get('k/d ratio', '0.00'),
+            "win_rate": stats.get('win %', '0.0%'),
+            "hs_rate": stats.get('headshot %', '0.0%'),
+            "top_agents": agents,
+            "status": "success"
+        }
+        
+        if user_id:
+            sync_to_api(user_id, result)
 
-        # --- K/D, WIN%, HS% ---
-        # Tracker.gg usually puts these in .numbers classes
-        # This is a bit brittle, using regex search on text is often safer
-        nums = soup.select('.numbers .value')
-        if len(nums) >= 3:
-            try:
-                # Based on typical layout: K/D, Win%, HS%
-                stats["kd_ratio"] = float(nums[0].get_text().replace(',', ''))
-                stats["win_rate"] = float(nums[1].get_text().replace('%', '').replace(',', ''))
-                stats["hs_rate"] = float(nums[2].get_text().replace('%', '').replace(',', ''))
-            except: pass
-
-        # --- TOP AGENTS ---
-        agents = soup.select('.top-agents__agent-name')
-        for agent in agents[:3]:
-            stats["top_agents"].append(agent.get_text(strip=True))
-
-        return stats
+        return result
 
     except Exception as e:
         return {"error": str(e)}
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(json.dumps({"error": "No Riot ID provided."}))
+    # Usage: python valorant_scraper.py Nick#Tag [optional_user_id]
+    if len(sys.argv) > 1:
+        riot_id = sys.argv[1]
+        user_id = sys.argv[2] if len(sys.argv) > 2 else None
+        print(json.dumps(scrape_tracker(riot_id, user_id), indent=2))
     else:
-        result = scrape_valorant_stats(sys.argv[1])
-        print(json.dumps(result, indent=2))
+        print("Usage: python valorant_scraper.py Nick#Tag [user_id]")
