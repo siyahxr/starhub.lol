@@ -39,10 +39,23 @@
                     <span>VEYA</span>
                 </div>
 
-                <a href="#" class="riot-auth-btn" onclick="alert('Lütfen önce Discord ile giriş yapın!')">
-                    <img src="logo.png" alt="Riot" class="riot-logo-icon" style="width: 24px;">
-                    <span class="auth-text">RIOT GAMES BAĞLA</span>
-                </a>
+                <!-- Riot Login Section -->
+                <div id="riotLoginContainer">
+                    <button class="riot-auth-btn" id="showRiotInput" style="width: 100%; border: none; cursor: pointer;">
+                        <img src="logo.png" alt="Riot" class="riot-logo-icon" style="width: 24px;">
+                        <span class="auth-text">RIOT GAMES BAĞLA</span>
+                    </button>
+                    
+                    <div id="riotInputArea" style="display: none; margin-top: 15px; animation: slideDown 0.4s ease;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="riotIdInput" placeholder="Nick#Tag" 
+                                style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); 
+                                       color: white; padding: 12px; border-radius: 12px; font-family: inherit; font-weight: 600;">
+                            <button id="doRiotLogin" class="primary-btn" style="padding: 10px 20px; border-radius: 12px;">GİRİŞ</button>
+                        </div>
+                        <p id="riotError" style="color: #ff4655; font-size: 0.8rem; margin-top: 8px; font-weight: 700; display: none;">Profil bulunamadı veya gizli!</p>
+                    </div>
+                </div>
             </div>
 
             <div class="auth-footer-detailed">
@@ -72,6 +85,73 @@
             star.style.animationDelay = `${Math.random() * 5}s`;
             starsContainer.appendChild(star);
         }
+
+        // --- Riot Login Logic ---
+        const btnShowInput = document.getElementById('showRiotInput');
+        const inputArea = document.getElementById('riotInputArea');
+        const riotIdInput = document.getElementById('riotIdInput');
+        const btnLogin = document.getElementById('doRiotLogin');
+        const errorMsg = document.getElementById('riotError');
+
+        btnShowInput.addEventListener('click', () => {
+            btnShowInput.style.display = 'none';
+            inputArea.style.display = 'block';
+            riotIdInput.focus();
+        });
+
+        btnLogin.addEventListener('click', async () => {
+            const valId = riotIdInput.value.trim();
+            if (!valId.includes('#')) {
+                errorMsg.textContent = 'Format: Nick#Tag olmalı!';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const [name, tag] = valId.split('#');
+            btnLogin.textContent = '...';
+            btnLogin.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                // Riot hesabını doğrula
+                const res = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    // Session objesi oluştur (Discord yerine Riot ID bazlı)
+                    const sessionData = {
+                        id: `riot_${data.data.puuid || name.toLowerCase()}`, // PUUID bazlı unique ID
+                        username: name,
+                        avatarUrl: '/logo.png', // Riot login'de avatar Discord'dan gelmez
+                        riot_name: name,
+                        riot_tag: tag,
+                        is_riot_login: true
+                    };
+
+                    // LocalStorage ve Cookie'ye kaydet
+                    const sessionStr = JSON.stringify(sessionData);
+                    localStorage.setItem('shub_user', sessionStr);
+                    
+                    // Kalıcı Cookie Ayarla (30 Gün)
+                    const sessionB64 = btoa(unescape(encodeURIComponent(sessionStr)));
+                    const expires = new Date();
+                    expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
+                    document.cookie = `shub_session=${sessionB64}; Path=/; Expires=${expires.toUTCString()}; SameSite=Lax; Secure`;
+
+                    // Dashboard yönlendirmesi (Hash olarak taşıyalım ki anlasın)
+                    window.location.href = '/dashboard.html#riot_login';
+                } else {
+                    errorMsg.textContent = 'Hesap bulunamadı veya gizli!';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'API hatası oluştu.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btnLogin.textContent = 'GİRİŞ';
+                btnLogin.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

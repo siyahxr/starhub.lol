@@ -89,10 +89,52 @@ body { background-color: var(--bg-primary); color: var(--text-primary); min-heig
 .sidebar-logo { display: flex; align-items: center; gap: 1.2rem; font-size: 1.6rem; font-weight: 900; margin-bottom: 5rem; color: #fff; letter-spacing: 1px; }
 .sidebar-logo img { width: 44px; filter: drop-shadow(0 0 8px var(--accent-glow)); }
 
-.sidebar-nav { display: flex; flex-direction: column; gap: 1rem; flex: 1; }
-.nav-item { color: rgba(255,255,255,0.5); text-decoration: none; padding: 1.2rem 1.8rem; border-radius: 14px; transition: 0.3s; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 1rem; }
-.nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
-.nav-item.active { background: rgba(160, 196, 214, 0.1); color: var(--accent-teal); border: 1px solid rgba(160, 196, 214, 0.2); box-shadow: 0 0 20px rgba(160, 196, 214, 0.1); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.8rem; flex: 1; }
+.nav-item { 
+    color: rgba(255,255,255,0.6); 
+    text-decoration: none; 
+    padding: 1.2rem 1.8rem; 
+    border-radius: 16px; 
+    transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+    font-weight: 800; 
+    font-size: 0.9rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 1.2rem; 
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+    letter-spacing: 0.5px;
+}
+.nav-item:hover { 
+    background: rgba(255,255,255,0.07); 
+    color: #fff; 
+    border-color: rgba(255,255,255,0.1);
+    transform: translateX(4px);
+}
+.nav-item.active { 
+    background: rgba(160, 196, 214, 0.08); 
+    color: var(--accent-teal); 
+    border: 1px solid rgba(160, 196, 214, 0.25); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.05); 
+}
+
+/* Social Badges System (Updated to match Pill Style) */
+.social-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.social-badge {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 0.6rem 1.4rem; border-radius: 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
+    text-decoration: none; font-size: 0.75rem; font-weight: 950;
+    color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1.5px;
+}
+.social-badge:hover { transform: translateY(-3px); color: #fff; filter: brightness(1.2); }
+.social-badge.yt:hover { background: #FF0000; border-color: #FF0000; box-shadow: 0 8px 20px rgba(255,0,0,0.3); }
+.social-badge.ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border-color: transparent; box-shadow: 0 8px 20px rgba(220,39,67,0.3); }
+.social-badge.tk:hover { background: #000000; border-color: #FE2C55; box-shadow: 0 8px 20px rgba(254,44,85,0.3); }
+.social-badge.dc:hover { background: #5865F2; border-color: #5865F2; box-shadow: 0 8px 20px rgba(88,101,242,0.3); }
+.social-badge.tw:hover { background: #9146FF; border-color: #9146FF; box-shadow: 0 8px 20px rgba(145,70,255,0.3); }
+.social-badge svg { width: 16px; height: 16px; fill: currentColor; transition: 0.3s; }
 
 .logout-btn { color: rgba(255,255,255,0.4); text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.3s; padding: 1rem; }
 .logout-btn:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }

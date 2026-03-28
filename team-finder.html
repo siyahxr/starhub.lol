@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarHUB | Team Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        .tf-header {
+            padding: 4rem 10% 2rem;
+            text-align: center;
+        }
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+        .tf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 0 10% 4rem;
+        }
+        .tf-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .tf-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .tf-rank-icon { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; }
+        .tf-user { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .tf-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); }
+        .tf-name { font-weight: 800; font-size: 1.1rem; }
+        .tf-role-badge { 
+            background: #ff4655; color: white; padding: 4px 12px; 
+            border-radius: 6px; font-size: 0.75rem; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .tf-title { font-size: 1rem; color: #eee; margin: 15px 0; line-height: 1.5; font-weight: 500; }
+        .tf-footer { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-top: 15px;
+            font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1a1a1a; border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 24px; width: 90%; max-width: 500px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary); font-size: 0.9rem; }
+        .form-input {
+            width: 100%; background: #222; border: 1px solid #333;
+            padding: 12px; border-radius: 12px; color: white; font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="premium-bg"></div>
+
+    <nav class="navbar">
+        <div class="nav-logo" onclick="location.href='/'" style="cursor:pointer">
+            <img src="logo.png" alt="StarHUB" class="nav-icon">
+            <span>STARHUB</span>
+        </div>
+        <div class="nav-links">
+            <a href="/">Keşfet</a>
+            <a href="/team-finder" class="active">TAKIM BUL</a>
+            <a href="login.html" class="nav-btn">Giriş</a>
+        </div>
+    </nav>
+
+    <header class="tf-header">
+        <div class="badge-new">VALORANT LFG ⚡</div>
+        <h1 class="main-title" style="font-size: 3.5rem;">TAKIMINI <span class="highlight">BUL</span></h1>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 1rem auto 3rem;">
+            Seviyene uygun oyuncularla eşleş, ilan ver ve elit kadronu hemen kur.
+        </p>
+
+        <div class="filter-bar">
+            <select class="filter-select" id="rankFilter" onchange="loadPosts()">
+                <option value="">Tüm Ranklar</option>
+                <option value="Iron">Iron</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Ascendant">Ascendant</option>
+                <option value="Immortal">Immortal</option>
+                <option value="Radiant">Radiant</option>
+            </select>
+            <select class="filter-select" id="roleFilter" onchange="loadPosts()">
+                <option value="">Tüm Roller</option>
+                <option value="Duelist">Duelist</option>
+                <option value="Controller">Controller</option>
+                <option value="Initiator">Initiator</option>
+                <option value="Sentinel">Sentinel</option>
+            </select>
+            <button class="primary-btn" onclick="openModal()" style="height: 45px; border-radius: 12px;">+ İLAN OLUŞTUR</button>
+        </div>
+    </header>
+
+    <div id="postsGrid" class="tf-grid">
+        <!-- Posts will load here -->
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 25px; font-weight: 900;">YENİ İLAN</h2>
+            <form id="postForm">
+                <div class="form-group">
+                    <label>Riot ID (Örn: Player#TR1)</label>
+                    <input type="text" id="riotId" class="form-input" placeholder="Player#TAG" required>
+                </div>
+                <div class="form-group">
+                    <label>Başlık / Açıklama</label>
+                    <input type="text" id="postTitle" class="form-input" placeholder="Örn: Rank kasan tryhard pre aranıyor" required>
+                </div>
+                <div class="form-group">
+                    <label>Rolün</label>
+                    <select id="postRole" class="form-input">
+                        <option value="Duelist">Duelist</option>
+                        <option value="Controller">Controller</option>
+                        <option value="Initiator">Initiator</option>
+                        <option value="Sentinel">Sentinel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Oyun Tarzı</label>
+                    <select id="postStyle" class="form-input">
+                        <option value="Aggressive">Agresif / Rush</option>
+                        <option value="Tactical">Taktiksel / Yavaş</option>
+                        <option value="Chill">Chill / Eğlence</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button type="button" class="secondary-btn" onclick="closeModal()" style="flex:1">İptal</button>
+                    <button type="submit" class="primary-btn" style="flex:2">Yayınla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getSession() {
+            const ls = localStorage.getItem('shub_user');
+            if (ls) return JSON.parse(ls);
+            return null;
+        }
+
+        async function loadPosts() {
+            const rank = document.getElementById('rankFilter').value;
+            const role = document.getElementById('roleFilter').value;
+            const grid = document.getElementById('postsGrid');
+            
+            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding: 4rem; color:var(--text-secondary)">İlanlar yükleniyor...</div>';
+            
+            try {
+                const res = await fetch(`/api/tf/posts?rank=${rank}&role=${role}`);
+                const posts = await res.json();
+                
+                if (posts.length === 0) {
+                    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding: 4rem; color:var(--text-secondary)">Kriterlere uygun ilan bulunamadı.</div>';
+                    return;
+                }
+
+                grid.innerHTML = posts.map(p => {
+                    const rankImg = `https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${p.rank_name.toLowerCase().replace(' ', '')}.png`;
+                    return `
+                        <div class="tf-card">
+                            <img src="${rankImg}" class="tf-rank-icon" onerror="this.style.display='none'">
+                            <div class="tf-user">
+                                <img src="${p.avatar_url || 'logo.png'}" class="tf-avatar">
+                                <div>
+                                    <div class="tf-name">${p.riot_name || p.username}#${p.riot_tag || 'val'}</div>
+                                    <span class="tf-role-badge">${p.role}</span>
+                                </div>
+                            </div>
+                            <div class="tf-title">"${p.title}"</div>
+                            <div class="tf-footer">
+                                <span>${p.rank_name} (${p.rank_rr} RR)</span>
+                                <span>${p.play_style}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                grid.innerHTML = 'Hata oluştu.';
+            }
+        }
+
+        function openModal() {
+            if (!getSession()) {
+                alert('İlan vermek için giriş yapmalısın!');
+                location.href = '/login';
+                return;
+            }
+            document.getElementById('postModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('postModal').style.display = 'none';
+        }
+
+        document.getElementById('postForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const session = getSession();
+            const riotId = document.getElementById('riotId').value;
+            const [name, tag] = riotId.split('#');
+
+            if (!name || !tag) {
+                alert('Lütfen Riot ID#Tag formatında girin!');
+                return;
+            }
+
+            const data = {
+                user_id: session.id,
+                title: document.getElementById('postTitle').value,
+                role: document.getElementById('postRole').value,
+                play_style: document.getElementById('postStyle').value,
+                riot_name: name,
+                riot_tag: tag
+            };
+
+            const btn = e.target.querySelector('.primary-btn');
+            btn.textContent = 'YAYINLANIYOR...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/tf/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    closeModal();
+                    loadPosts();
+                    e.target.reset();
+                } else {
+                    alert('Hata oluştu!');
+                }
+            } catch (err) {
+                alert('Bağlantı hatası!');
+            } finally {
+                btn.textContent = 'YAYINLA';
+                btn.disabled = false;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', loadPosts);
+    </script>
+</body>
+</html>

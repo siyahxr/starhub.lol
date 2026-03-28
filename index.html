@@ -42,15 +42,6 @@
                 rankını senkronize et ve elit oyuncu topluluğunda parlamaya başla.
             </p>
             
-            <div class="actions">
-                <a href="login.html" class="primary-btn">
-                    <img src="logo.png" class="riot-mini" alt="StarHUB">
-                    <span>HEMEN BAŞLA</span>
-                </a>
-                <a href="https://discord.gg/starhub" class="secondary-btn">
-                    <span>DISCORD KATIL</span>
-                </a>
-            </div>
             <div class="onboarding-steps">
                 GÜVENİLLİR • HIZLI • ÜCRETSİZ
             </div>
@@ -146,7 +137,43 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadMembers);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMembers();
+            checkSession();
+        });
+
+        function getCookie(name) {
+            const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+            return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
+        }
+
+        function getSession() {
+            const cookie = getCookie('shub_session');
+            if (cookie) {
+                try { return JSON.parse(decodeURIComponent(escape(atob(cookie)))); } catch (e) {}
+            }
+            const ls = localStorage.getItem('shub_user');
+            if (ls) {
+                try { return JSON.parse(ls); } catch (e) {}
+            }
+            return null;
+        }
+
+        function checkSession() {
+            const session = getSession();
+            if (session && session.id) {
+                const navBtn = document.querySelector('.nav-btn');
+                if (navBtn) {
+                    navBtn.textContent = 'DASHBOARD';
+                    navBtn.href = '/dashboard';
+                }
+                const primaryBtn = document.querySelector('.primary-btn');
+                if (primaryBtn) {
+                    primaryBtn.href = '/dashboard';
+                    primaryBtn.querySelector('span').textContent = 'KONTROL PANELİ';
+                }
+            }
+        }
     </script>
 </body>
 </html>

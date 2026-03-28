@@ -254,10 +254,32 @@
             <!-- ── TAB: İSTATİSTİKLER ── -->
             <section class="tab-content" id="tab-stats">
                 <div class="dash-grid">
-                    <div class="dash-card-xl" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                        <div style="font-size: 4rem; margin-bottom: 2rem; opacity: 0.2;">📊</div>
-                        <h3 style="font-size: 1.5rem; font-weight: 950; letter-spacing: 1px;">İSTATİSTİKLER YAKINDA</h3>
-                        <p style="color:var(--text-secondary); margin-top:1rem; max-width: 400px; line-height: 1.6;">Valorant API entegrasyonu tamamlandığında maç geçmişin, favori ajanların ve performans grafiklerin burada sergilenecek.</p>
+                    <div class="dash-card-xl">
+                        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="font-size: 1.5rem; font-weight: 950; letter-spacing: -1px;">PERFORMANS ANALİZİ</h3>
+                                <p style="color: var(--text-secondary); margin-top: 0.5rem; font-weight: 600;">Son maçların ve genel istatistiklerin.</p>
+                            </div>
+                            <button id="refreshStatsBtn" class="edit-profile-btn" style="padding: 0.6rem 1.2rem; font-size: 0.8rem;">🔄 VERİLERİ YENİLE</button>
+                        </header>
+                        
+                        <div id="statsLoader" style="padding: 4rem; text-align: center; color: var(--text-secondary);">Veriler analiz ediliyor...</div>
+                        
+                        <div id="statsContent" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                                <!-- Rank Box -->
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2rem; text-align: center;">
+                                    <img src="" id="statsRankIcon" style="width: 100px; filter: drop-shadow(0 0 20px var(--accent-glow));">
+                                    <h4 id="statsRankName" style="font-size: 1.5rem; font-weight: 900; margin-top: 1rem;">Unranked</h4>
+                                    <p id="statsRankRR" style="color: var(--accent-teal); font-weight: 800;">0 RR</p>
+                                </div>
+                                
+                                <!-- Last Matches -->
+                                <div id="lastMatchesList" style="display: flex; flex-direction: column; gap: 1rem;">
+                                    <!-- Dynamic Matches Here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -265,10 +287,42 @@
             <!-- ── TAB: TAKIM BUL ── -->
             <section class="tab-content" id="tab-team">
                 <div class="dash-grid">
-                    <div class="dash-card-xl" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                        <div style="font-size: 4rem; margin-bottom: 2rem; opacity: 0.2;">⚔️</div>
-                        <h3 style="font-size: 1.5rem; font-weight: 950; letter-spacing: 1px;">TAKIM BULUCU YAKINDA</h3>
-                        <p style="color:var(--text-secondary); margin-top:1rem; max-width: 400px; line-height: 1.6;">Rankına ve oyun tarzına en uygun takım arkadaşlarını bulmanı sağlayacak sistemimiz geliştirme aşamasında.</p>
+                    <div class="dash-card-xl">
+                        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="font-size: 1.5rem; font-weight: 950; letter-spacing: -1px;">TAKIM BULUCU (LFG)</h3>
+                                <p style="color: var(--text-secondary); margin-top: 0.5rem; font-weight: 600;">Rankına uygun yeni silah arkadaşları bul.</p>
+                            </div>
+                            <button id="openTfModalBtn" class="sync-now-btn" style="padding: 0.8rem 1.5rem; font-size: 0.9rem; border-radius: 12px;">+ İLAN OLUŞTUR</button>
+                        </header>
+
+                        <!-- Filtreler -->
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <select id="tfFilterRank" class="dash-input" style="flex: 1; height: 45px;" onchange="loadTfPosts()">
+                                <option value="">Tüm Ranklar</option>
+                                <option value="Iron">Iron</option>
+                                <option value="Bronze">Bronze</option>
+                                <option value="Silver">Silver</option>
+                                <option value="Gold">Gold</option>
+                                <option value="Platinum">Platinum</option>
+                                <option value="Diamond">Diamond</option>
+                                <option value="Ascendant">Ascendant</option>
+                                <option value="Immortal">Immortal</option>
+                                <option value="Radiant">Radiant</option>
+                            </select>
+                            <select id="tfFilterRole" class="dash-input" style="flex: 1; height: 45px;" onchange="loadTfPosts()">
+                                <option value="">Tüm Roller</option>
+                                <option value="Duelist">Duelist</option>
+                                <option value="Controller">Controller</option>
+                                <option value="Initiator">Initiator</option>
+                                <option value="Sentinel">Sentinel</option>
+                            </select>
+                        </div>
+
+                        <div id="lfgGrid" class="lfg-list-container" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Lobi Satırları Buraya Gelecek -->
+                            <div style="text-align: center; padding: 4rem; color: var(--text-secondary);">Aktif lobi kodu taranıyor...</div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -332,10 +386,45 @@
                                         <div class="upload-progress-bar" id="bannerProgressBar"></div>
                                     </div>
                                 </div>
+                                </div>
+                            </div>
+
+                            <!-- SOSYAL MEDYA LİNKLRİ -->
+                            <div style="margin-top: 3rem; border-top: 1px solid var(--glass-border); padding-top: 3rem;">
+                                <h4 style="font-size: 1.1rem; font-weight: 950; letter-spacing: 1px; margin-bottom: 2rem;">🔗 SOSYAL MEDYA LİNKLRİ</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                    <div class="form-group">
+                                        <label>YOUTUBE KANALI</label>
+                                        <input type="text" id="ytUrlInput" placeholder="https://youtube.com/@..." class="dash-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>INSTAGRAM PROFİLİ</label>
+                                        <input type="text" id="igUrlInput" placeholder="https://instagram.com/..." class="dash-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>TIKTOK PROFİLİ</label>
+                                        <input type="text" id="tkUrlInput" placeholder="https://tiktok.com/@..." class="dash-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>TWITCH KANALI</label>
+                                        <input type="text" id="twUrlInput" placeholder="https://twitch.tv/..." class="dash-input">
+                                    </div>
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>DISCORD (ID VEYA İSİM)</label>
+                                        <input type="text" id="dcIdInput" placeholder="siyahxr" class="dash-input">
+                                    </div>
+                                </div>
                             </div>
 
                             <button class="sync-now-btn" id="saveProfileBtn" style="margin-top: 2rem; background: var(--accent-teal); color: #000; font-weight: 950;">💾 PROFİLİ KAYDET</button>
                             <p class="save-msg" id="saveMsg" style="text-align: center;"></p>
+
+                            <!-- DANGER ZONE -->
+                            <div style="margin-top: 5rem; border-top: 1px solid rgba(255, 0, 0, 0.2); padding-top: 3rem;">
+                                <h3 style="color: #ff4b2b; font-size: 1.2rem; font-weight: 950; letter-spacing: 1px;">🛑 TEHLİKELİ BÖLGE</h3>
+                                <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem; font-weight: 600;">Hesabını sildiğinde tüm profil verilerin (slug, bio, resimler) kalıcı olarak silinir. Bu işlem geri alınamaz.</p>
+                                <button id="deleteAccountBtn" style="margin-top: 1.5rem; background: rgba(255, 75, 43, 0.1); border: 1px solid rgba(255, 75, 43, 0.3); color: #ff4b2b; padding: 1rem 2rem; border-radius: 12px; font-weight: 950; cursor: pointer; transition: 0.3s; width: 100%;">HESABIMI TAMAMEN SİL</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -409,6 +498,100 @@
         </div>
     </div>
 
+    <!-- Lobi Oluştur Modal (Updated) -->
+    <div class="modal-overlay" id="tfModal">
+        <div class="modal-card" style="max-width: 550px;">
+            <header style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #ff4655; font-size: 1.5rem; font-weight: 900;">+</span>
+                    <h2 style="font-size: 1.4rem;">LOBİ OLUŞTUR</h2>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px;">Şunun için yeni oyun kur: <b style="color: #fff;">Valorant</b></p>
+            </header>
+            
+            <form id="tfForm" class="settings-form" style="margin-top:0">
+                <div class="form-group">
+                    <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">LOBİ KODU</label>
+                    <input type="text" id="tfLobbyCode" class="dash-input" placeholder="Örn: FRK919" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">OYUN MODU</label>
+                    <select id="tfGameMode" class="dash-input">
+                        <option value="Dereceli">Dereceli</option>
+                        <option value="Derecesiz">Derecesiz</option>
+                        <option value="Tam Gaz">Tam Gaz</option>
+                        <option value="Premier">Premier</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">MİNİMUM RANK</label>
+                        <select id="tfMinRank" class="dash-input">
+                            <option value="Demir">Demir</option>
+                            <option value="Bronz">Bronz</option>
+                            <option value="Gümüş">Gümüş</option>
+                            <option value="Altın">Altın</option>
+                            <option value="Platin">Platin</option>
+                            <option value="Elmas">Elmas</option>
+                            <option value="Yücelik">Yücelik</option>
+                            <option value="Ölümsüz">Ölümsüz</option>
+                            <option value="Radyant">Radyant</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">MAKSİMUM RANK</label>
+                        <select id="tfMaxRank" class="dash-input">
+                            <option value="Demir">Demir</option>
+                            <option value="Bronz">Bronz</option>
+                            <option value="Gümüş">Gümüş</option>
+                            <option value="Altın">Altın</option>
+                            <option value="Platin" selected>Platin</option>
+                            <option value="Elmas">Elmas</option>
+                            <option value="Yücelik">Yücelik</option>
+                            <option value="Ölümsüz">Ölümsüz</option>
+                            <option value="Radyant">Radyant</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">OYUNCU SAYISI</label>
+                        <select id="tfPlayersNeeded" class="dash-input">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">YAŞ ARALIĞI</label>
+                        <select id="tfAgeRange" class="dash-input">
+                            <option value="Tümü">Tümü</option>
+                            <option value="18+">18+</option>
+                            <option value="25+">25+</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">MESSAGE (OPTIONAL)</label>
+                    <input type="text" id="tfTitle" class="dash-input" placeholder="Örn: Tryhard duo aranıyor...">
+                </div>
+
+                <!-- Hidden but required for Riot ID validation -->
+                <input type="hidden" id="tfRole" value="Flex"> 
+
+                <div class="modal-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" id="tfCancelBtn" style="background: transparent; color: #888; border: none; font-weight: 700; cursor: pointer;">✕</button>
+                    <button type="submit" class="sync-now-btn" style="background: #ff4655; color: #fff; border-radius: 8px; font-weight: 900; padding: 0.8rem 2rem;">LOBİ KUR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
     // ════════════════════════════════════════════════════════
     //  STARHUB DASHBOARD ENGINE
@@ -466,11 +649,41 @@
     } else {
         // Oturumu localStorage'a da yedekle
         localStorage.setItem('shub_user', JSON.stringify(session));
+        
+        // KRİTİK: Eğer cookie silindiyse ama LocalStorage duruyorsa, cookie'yi geri yükle (Restore)
+        if (!getCookie('shub_session')) {
+            const sessionB64 = btoa(unescape(encodeURIComponent(JSON.stringify(session))));
+            const expires = new Date(Date.now() + 2592000 * 1000).toUTCString();
+            document.cookie = `shub_session=${sessionB64}; Path=/; Max-Age=2592000; Expires=${expires}; SameSite=Lax; Secure`;
+            console.log('Oturum çerezi başarıyla onarıldı.');
+        }
+
         initDashboard(session);
     }
 
     // ─── Dashboard Başlatma ───────────────────────────────────
     async function initDashboard(user) {
+        // --- Riot Login Özel Durumu (İlk giriş senkronizasyonu) ---
+        if (user.is_riot_login) {
+            try {
+                // Profile veritabanında var mı? (Giriş yapılmışsa oto-kayıt/güncelleme gönder)
+                const body = {
+                    user_id: user.id,
+                    username: user.username,
+                    avatar_url: user.avatarUrl || '/logo.png',
+                    riot_name: user.riot_name,
+                    riot_tag: user.riot_tag,
+                    is_public: 1,
+                    sync_active: 1
+                };
+                await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+            } catch (e) { console.error('Riot login sync fail:', e); }
+        }
+
         // Temel UI güncelle
         document.getElementById('welcomeName').textContent = user.username || 'Agent';
         document.getElementById('pillName').textContent = user.username || 'Agent';
@@ -479,7 +692,7 @@
             document.getElementById('mainAvatar').src = user.avatarUrl;
         }
         document.getElementById('displayName').innerHTML =
-            `${user.username || 'Agent'} <span class="tag">#${user.discriminator || '0'}</span>`;
+            `${user.username || 'Agent'} <span class="tag">#${user.discriminator || 'val'}</span>`;
 
         // D1'den profil yükle
         try {
@@ -500,6 +713,13 @@
                 }
             }
         } catch (e) { console.error('Profil yüklenemedi:', e); }
+
+        // Riot login yapıldıysa otomatik istatistikleri çek
+        if (user.is_riot_login) {
+            setTimeout(() => {
+                document.querySelector('[data-tab=stats]').click(); // İstatistikler tabına git
+            }, 100);
+        }
     }
 
     function applyProfile(p) {
@@ -533,6 +753,13 @@
         }
         if (p.sync_active !== undefined) document.getElementById('toggleSync').checked = !!p.sync_active;
         if (p.is_public !== undefined) document.getElementById('togglePublic').checked = !!p.is_public;
+
+        // Sosyal Medya Doldur
+        if (p.yt_url) document.getElementById('ytUrlInput').value = p.yt_url;
+        if (p.ig_url) document.getElementById('igUrlInput').value = p.ig_url;
+        if (p.tk_url) document.getElementById('tkUrlInput').value = p.tk_url;
+        if (p.tw_url) document.getElementById('twUrlInput').value = p.tw_url;
+        if (p.dc_id)  document.getElementById('dcIdInput').value  = p.dc_id;
     }
 
     // ─── ImgBB Yükleme ────────────────────────────────────────
@@ -634,6 +861,11 @@
             banner_url: bannerUrl || '',
             is_public: document.getElementById('togglePublic').checked ? 1 : 0,
             sync_active: document.getElementById('toggleSync').checked ? 1 : 0,
+            yt_url: document.getElementById('ytUrlInput').value || '',
+            ig_url: document.getElementById('igUrlInput').value || '',
+            tk_url: document.getElementById('tkUrlInput').value || '',
+            tw_url: document.getElementById('twUrlInput').value || '',
+            dc_id:  document.getElementById('dcIdInput').value  || '',
         };
 
         const res = await fetch('/api/profile', {
@@ -745,11 +977,229 @@
     });
 
     // ─── Çıkış ───────────────────────────────────────────────
+    function fullLogout() {
+        document.cookie = 'shub_session=; Path=/; Max-Age=0; Secure';
+        localStorage.removeItem('shub_user');
+        window.location.href = '/';
+    }
+
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        document.cookie = 'shub_session=; Path=/; Max-Age=0; Secure';
-        window.location.href = '/';
+        fullLogout();
     });
+
+    // ─── Hesap Silme ─────────────────────────────────────────
+    document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+        if (!confirm('HESABINI SİLMEK İSTEDİĞİNE EMİN MİSİN?\nBu işlem geri alınamaz ve tüm profilin kalıcı olarak silinir.')) return;
+        
+        try {
+            const res = await fetch('/api/profile', { method: 'DELETE' });
+            const data = await res.json();
+            
+            if (data.success) {
+                toast('Hesabın ve tüm verilerin başarıyla silindi. Hoşçakal!');
+                setTimeout(() => fullLogout(), 2000);
+            } else {
+                toast(data.error || 'Silme işlemi başarısız', 'error');
+            }
+        } catch (e) {
+            toast('Bir hata oluştu: ' + e.message, 'error');
+        }
+    });
+    // ─── Team Finder Logic ────────────────────────────────────
+    async function loadTfPosts() {
+        const rank = document.getElementById('tfFilterRank').value;
+        const role = document.getElementById('tfFilterRole').value;
+        const grid = document.getElementById('lfgGrid');
+        
+        try {
+            const res = await fetch(`/api/tf/posts?rank=${rank}&role=${role}`);
+            const posts = await res.json();
+            
+            if (posts.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary);">Kriterlere uygun ilan bulunamadı.</div>';
+                return;
+            }
+
+            grid.innerHTML = posts.map(p => `
+                <div class="lobby-row" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1rem 1.5rem; display: grid; grid-template-columns: 2fr 1fr 2fr 1fr 1.5fr 1fr 100px; align-items: center; border-radius: 8px; gap: 1rem;">
+                    <!-- Profil -->
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="${p.avatar_url || 'logo.png'}" style="width: 40px; height: 40px; border-radius: 8px;">
+                        <div>
+                            <div style="font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+                                ${p.username} 
+                                <span style="color: #2ecc71; font-size: 0.8rem;">✔️</span>
+                            </div>
+                            <button class="stats-mini-btn" style="background: #ff465522; color: #ff4655; border: none; font-size: 0.6rem; font-weight: 900; padding: 2px 6px; border-radius: 4px; cursor: pointer;">📊 İSTATİSTİKLER</button>
+                        </div>
+                    </div>
+
+                    <!-- Lobi Kodu -->
+                    <div style="display: flex; align-items: center; gap: 8px; color: #ff4655; font-weight: 950; letter-spacing: 1px; font-size: 1rem;">
+                        ${p.lobby_code || '---'}
+                        <span onclick="copyToClipboard('${p.lobby_code}')" style="cursor: pointer; opacity: 0.5; font-size: 0.8rem;">📋</span>
+                    </div>
+
+                    <!-- Mesaj -->
+                    <div style="color: #eee; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${p.title ? `💬 ${p.title}` : '-'}
+                    </div>
+
+                    <!-- Mod -->
+                    <div style="text-align: center;">
+                        <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 900;">${p.game_mode}</span>
+                    </div>
+
+                    <!-- Rank Aralığı -->
+                    <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                        <img src="https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${p.min_rank.toLowerCase()}.png" style="width: 20px;" onerror="this.style.display='none'">
+                        <span style="opacity: 0.3;">→</span>
+                        <img src="https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${p.max_rank.toLowerCase()}.png" style="width: 20px;" onerror="this.style.display='none'">
+                    </div>
+
+                    <!-- Oyuncu Sayısı -->
+                    <div style="text-align: center; color: #2ecc71; font-weight: 950; font-size: 1rem;">
+                        <span style="font-size: 0.8rem; opacity: 0.7;">👥</span> +${p.players_needed}
+                    </div>
+
+                    <!-- Zaman -->
+                    <div style="text-align: right; color: var(--text-secondary); font-size: 0.7rem; font-weight: 600;">
+                        🕒 Az önce
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) { console.error('Tf load error:', e); }
+    }
+
+    document.getElementById('openTfModalBtn').addEventListener('click', () => {
+        document.getElementById('tfModal').classList.add('open');
+    });
+    document.getElementById('tfCancelBtn').addEventListener('click', () => {
+        document.getElementById('tfModal').classList.remove('open');
+    });
+
+    document.getElementById('tfForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const riotId = document.getElementById('tfRiotId').value;
+        const [name, tag] = riotId.split('#');
+
+        if (!name || !tag) { toast('Lütfen Nick#Tag şeklinde girin!', 'error'); return; }
+
+        btn.textContent = '⏳ YAYINLANIYOR...'; btn.disabled = true;
+
+        const body = {
+            user_id: session.id,
+            title: document.getElementById('tfTitle').value,
+            role: document.getElementById('tfRole').value,
+            players_needed: parseInt(document.getElementById('tfPlayersNeeded').value),
+            lobby_code: document.getElementById('tfLobbyCode').value,
+            game_mode: document.getElementById('tfGameMode').value,
+            min_rank: document.getElementById('tfMinRank').value,
+            max_rank: document.getElementById('tfMaxRank').value,
+            age_range: document.getElementById('tfAgeRange').value,
+            riot_name: session.riot_name,
+            riot_tag: session.riot_tag
+        };
+
+        try {
+            const res = await fetch('/api/tf/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                toast('İlan başarıyla yayınlandı!');
+                document.getElementById('tfModal').classList.remove('open');
+                loadTfPosts();
+                loadPlayerStats(); // Rank güncellenmiş olabilir
+            } else { toast('İlan verilirken hata oluştu.', 'error'); }
+        } catch (e) { toast('Bağlantı hatası.', 'error'); }
+        finally { btn.textContent = '🚀 İLANI YAYINLA'; btn.disabled = false; }
+    });
+
+    // ─── Canlı İstatistikler Logic ────────────────────────────
+    async function loadPlayerStats(forceRefresh = false) {
+        const loader = document.getElementById('statsLoader');
+        const content = document.getElementById('statsContent');
+        
+        try {
+            // Profil verisinden Nick#Tag al
+            const profRes = await fetch(`/api/profile?user_id=${session.id}`);
+            const profile = await profRes.json();
+            
+            if (!profile.riot_name || !profile.riot_tag) {
+                loader.innerHTML = `
+                    <p style="margin-bottom: 1.5rem;">İstatistikleri görmek için Riot ID'ni bağlaman gerekiyor.</p>
+                    <button class="edit-profile-btn" onclick="document.querySelector('[data-tab=settings]').click()">⚙️ AYARLARDAN BAĞLA</button>
+                `;
+                return;
+            }
+
+            loader.style.display = 'block';
+            content.style.display = 'none';
+
+            // HenrikDev API üzerinden maç hikayesi (Proxy üzerinden veya doğrudan FETCh)
+            // Bu kısım Henrik v3 matches endpointini kullanır
+            const matchRes = await fetch(`https://api.henrikdev.xyz/valorant/v3/matches/eu/${profile.riot_name}/${profile.riot_tag}?size=3`);
+            if (matchRes.ok) {
+                const matchData = await matchRes.json();
+                renderMatches(matchData.data, profile.riot_name, profile.riot_tag);
+                
+                // Rank bilgilerini güncelle
+                document.getElementById('statsRankIcon').src = profile.rank_icon || `https://raw.githubusercontent.com/siyahxr/starhub.lol/main/ranks/${profile.rank_name.toLowerCase().replace(' ', '')}.png`;
+                document.getElementById('statsRankName').textContent = profile.rank_name;
+                document.getElementById('statsRankRR').textContent = `${profile.rank_rr} RR`;
+                
+                loader.style.display = 'none';
+                content.style.display = 'block';
+            }
+        } catch (e) {
+            loader.textContent = 'Bilgiler yüklenirken hata oluştu.';
+        }
+    }
+
+    function renderMatches(matches, name, tag) {
+        const list = document.getElementById('lastMatchesList');
+        list.innerHTML = matches.map(m => {
+            const me = m.players.all_players.find(p => p.name.toLowerCase() === name.toLowerCase());
+            const win = m.teams[me.team.toLowerCase()].has_won;
+            const resultColor = win ? '#2ecc71' : '#ff4655';
+            const kda = `${me.stats.kills}/${me.stats.deaths}/${me.stats.assists}`;
+            
+            return `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 1rem 1.5rem; border-radius: 15px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="${me.assets.agent.small}" style="width: 40px; border-radius: 10px; border: 1px solid ${resultColor}">
+                        <div>
+                            <div style="font-weight: 900; font-size: 0.9rem;">${m.metadata.map}</div>
+                            <span style="font-size: 0.7rem; font-weight: 800; color: ${resultColor}">${win ? 'WIN' : 'LOSS'}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 950; font-size: 1rem;">${kda}</div>
+                        <span style="font-size: 0.7rem; color: var(--text-secondary);">KDA SCORE</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('refreshStatsBtn').addEventListener('click', () => loadPlayerStats(true));
+
+    // Ek Tab Başlatıcıları
+    document.querySelector('[data-tab=team]').addEventListener('click', loadTfPosts);
+    document.querySelector('[data-tab=stats]').addEventListener('click', loadPlayerStats);
+
+    // İlk yüklemede takımları çek
+    if (window.location.hash === '#team') loadTfPosts();
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        toast('Riot ID kopyalandı: ' + text);
+    }
+
     </script>
 </body>
 </html>

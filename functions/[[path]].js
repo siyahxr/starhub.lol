@@ -106,11 +106,12 @@ export async function onRequest(context) {
     const session    = JSON.stringify({ id: userId, username, discriminator: disc, avatarUrl });
     const sessionB64 = btoa(unescape(encodeURIComponent(session)));
 
+    const expires = new Date(Date.now() + 2592000 * 1000).toUTCString();
     return new Response(null, {
       status: 302,
       headers: {
         Location:    'https://starhub.lol/dashboard.html',
-        'Set-Cookie': `shub_session=${sessionB64}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`,
+        'Set-Cookie': `shub_session=${sessionB64}; Path=/; Max-Age=2592000; Expires=${expires}; SameSite=Lax; Secure`,
       },
     });
   }
@@ -151,7 +152,7 @@ export async function onRequest(context) {
     if (request.method === 'POST') {
       try {
         const body = await request.json();
-        const { user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active } = body;
+        const { user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url } = body;
 
         if (!user_id || !username) {
           return new Response(JSON.stringify({ error: 'user_id ve username gerekli' }), { status: 400, headers: corsHeaders });
@@ -169,8 +170,8 @@ export async function onRequest(context) {
         const current = await env.DB.prepare('SELECT * FROM profiles WHERE user_id = ?').bind(user_id).first();
 
         await env.DB.prepare(`
-          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO profiles (user_id, username, slug, avatar_url, banner_url, bio, is_public, sync_active, yt_url, ig_url, tk_url, dc_id, tw_url)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             username   = excluded.username,
             slug       = excluded.slug,
@@ -178,7 +179,12 @@ export async function onRequest(context) {
             banner_url = excluded.banner_url,
             bio        = excluded.bio,
             is_public  = excluded.is_public,
-            sync_active = excluded.sync_active
+            sync_active = excluded.sync_active,
+            yt_url      = excluded.yt_url,
+            ig_url      = excluded.ig_url,
+            tk_url      = excluded.tk_url,
+            dc_id       = excluded.dc_id,
+            tw_url      = excluded.tw_url
         `).bind(
           user_id, username,
           slug || current?.slug || username.toLowerCase().replace(/[^a-z0-9_-]/gi, ''),
@@ -186,7 +192,12 @@ export async function onRequest(context) {
           banner_url || current?.banner_url || '',
           bio        ?? current?.bio        ?? '',
           is_public  ?? current?.is_public  ?? 1,
-          sync_active ?? current?.sync_active ?? 1
+          sync_active ?? current?.sync_active ?? 1,
+          yt_url      ?? current?.yt_url      ?? '',
+          ig_url      ?? current?.ig_url      ?? '',
+          tk_url      ?? current?.tk_url      ?? '',
+          dc_id       ?? current?.dc_id       ?? '',
+          tw_url      ?? current?.tw_url      ?? ''
         ).run();
 
         const finalSlug = slug || current?.slug || username;
@@ -195,6 +206,23 @@ export async function onRequest(context) {
           profileUrl: `https://starhub.lol/${finalSlug}`
         }), { headers: corsHeaders });
 
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+      }
+    }
+
+    if (request.method === 'DELETE') {
+      const cookieString = request.headers.get('Cookie') || '';
+      const sessionMatch = cookieString.match(/shub_session=([^;]+)/);
+      if (!sessionMatch) return new Response(JSON.stringify({ error: 'Oturum yok' }), { status: 401, headers: corsHeaders });
+      
+      try {
+        const sessionData = JSON.parse(decodeURIComponent(escape(atob(sessionMatch[1]))));
+        const user_id = sessionData.id;
+        
+        await env.DB.prepare('DELETE FROM profiles WHERE user_id = ?').bind(user_id).run();
+        
+        return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
       }
@@ -212,7 +240,7 @@ export async function onRequest(context) {
       'Content-Type': 'application/json',
     };
     try {
-      const users = await env.DB.prepare('SELECT user_id, username, slug, avatar_url, banner_url, bio, rank_name, rank_rr FROM profiles WHERE is_public = 1 ORDER BY created_at DESC').all();
+      const users = await env.DB.prepare('SELECT user_id, username, slug, avatar_url, banner_url, bio, rank_name, rank_rr, yt_url, ig_url, tk_url, dc_id, tw_url FROM profiles WHERE is_public = 1 ORDER BY created_at DESC').all();
       return new Response(JSON.stringify(users.results), { headers: corsHeaders });
     } catch (e) {
       return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
@@ -252,12 +280,94 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
+  // 5. TEAM FINDER API  →  /api/tf
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/tf/posts') {
+    const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+    try {
+      // 24 saatten eski ilanları sil
+      const limit = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      await env.DB.prepare('DELETE FROM team_finder WHERE created_at < ?').bind(limit).run();
+
+      const rankFilter = url.searchParams.get('rank');
+      const roleFilter = url.searchParams.get('role');
+
+      let query = `
+        SELECT tf.*, p.username, p.riot_name, p.riot_tag, p.rank_name, p.rank_rr, p.avatar_url 
+        FROM team_finder tf 
+        JOIN profiles p ON tf.user_id = p.user_id
+      `;
+      const params = [];
+
+      if (rankFilter || roleFilter) {
+        query += " WHERE ";
+        if (rankFilter) {
+          query += " p.rank_name LIKE ? ";
+          params.push(`%${rankFilter}%`);
+        }
+        if (roleFilter) {
+          if (rankFilter) query += " AND ";
+          query += " tf.role = ? ";
+          params.push(roleFilter);
+        }
+      }
+
+      query += " ORDER BY tf.created_at DESC ";
+      const posts = await env.DB.prepare(query).bind(...params).all();
+      return new Response(JSON.stringify(posts.results), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  if (pathname === '/api/tf/create' && request.method === 'POST') {
+    const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+    try {
+      const body = await request.json();
+      const { user_id, title, role, play_style, riot_name, riot_tag } = body;
+
+      if (!user_id || !title || !role) {
+        return new Response(JSON.stringify({ error: 'Eksik bilgi!' }), { status: 400, headers: corsHeaders });
+      }
+
+      // Rank Güncelleme (HenrikDev API)
+      let currentRank = 'Unranked';
+      let currentRR = 0;
+      if (riot_name && riot_tag) {
+        try {
+          const valRes = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${riot_name}/${riot_tag}`, {
+            headers: { 'Accept': 'application/json' }
+          });
+          if (valRes.ok) {
+            const valData = await valRes.json();
+            currentRank = valData.data?.currenttierpatched || 'Unranked';
+            currentRR = valData.data?.ranking_in_tier || 0;
+          }
+        } catch (e) { console.error('Rank sync failed:', e.message); }
+      }
+
+      // DB Güncelle ve İlan Ekle
+      await env.DB.batch([
+        env.DB.prepare('UPDATE profiles SET rank_name = ?, rank_rr = ?, riot_name = ?, riot_tag = ? WHERE user_id = ?')
+          .bind(currentRank, currentRR, riot_name, riot_tag, user_id),
+        env.DB.prepare('INSERT INTO team_finder (user_id, title, role, players_needed, lobby_code, game_mode, min_rank, max_rank, age_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(user_id, title, role, body.players_needed || 1, body.lobby_code, body.game_mode, body.min_rank, body.max_rank, body.age_range)
+      ]);
+
+      return new Response(JSON.stringify({ success: true, rank: currentRank }), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
   // 4. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
     '/', '/index.html', '/login.html', '/login', '/dashboard.html',
     '/dashboard', '/admin', '/admin/index.html', '/profile.html',
     '/style.css', '/logo.png', '/bg.png', '/riot.txt', '/schema.sql', '/favicon.ico',
+    '/team-finder', '/team-finder.html'
   ];
 
   if (staticPaths.includes(pathname) || pathname.match(/\.[a-z0-9]+$/i)) {
@@ -270,6 +380,9 @@ export async function onRequest(context) {
     }
     if (pathname === '/admin') {
       return env.ASSETS.fetch(new Request(new URL('/admin/index.html', url).toString()));
+    }
+    if (pathname === '/team-finder') {
+      return env.ASSETS.fetch(new Request(new URL('/team-finder.html', url).toString()));
     }
     return env.ASSETS.fetch(request);
   }
