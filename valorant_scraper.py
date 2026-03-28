@@ -19,6 +19,7 @@ def sync_to_api(user_id, data):
         "win_rate": data['win_rate'],
         "hs_rate": data['hs_rate'],
         "rank_numeric": data['rank_numeric'],
+        "rank_name": data['rank'],
         "top_agents": data['top_agents']
     }
     try:

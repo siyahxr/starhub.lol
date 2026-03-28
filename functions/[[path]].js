@@ -486,13 +486,13 @@ export async function onRequest(context) {
     const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
     try {
       const body = await request.json();
-      const { user_id, kd, win_rate, hs_rate, rank_numeric, top_agents } = body;
+      const { user_id, kd, win_rate, hs_rate, rank_numeric, rank_name, top_agents } = body;
 
       await env.DB.prepare(`
         UPDATE profiles 
-        SET kd_ratio = ?, win_rate = ?, hs_rate = ?, rank_numeric = ?, top_agents = ?
+        SET kd_ratio = ?, win_rate = ?, hs_rate = ?, rank_numeric = ?, rank_name = ?, top_agents = ?
         WHERE user_id = ?
-      `).bind(kd, win_rate, hs_rate, rank_numeric, top_agents.join(','), user_id).run();
+      `).bind(kd, win_rate, hs_rate, rank_numeric, rank_name, top_agents.join(','), user_id).run();
 
       return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
     } catch (e) {
