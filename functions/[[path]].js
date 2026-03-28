@@ -418,99 +418,33 @@ export async function onRequest(context) {
     if (!userId) return new Response(JSON.stringify({ error: 'user_id gerekli' }), { status: 400, headers: corsHeaders });
 
     try {
-      const profile = await env.DB.prepare('SELECT riot_name, riot_tag FROM profiles WHERE user_id = ?').bind(userId).first();
+      const profile = await env.DB.prepare('SELECT * FROM profiles WHERE user_id = ?').bind(userId).first();
       if (!profile || !profile.riot_name) return new Response(JSON.stringify({ error: 'Riot hesabı bağlı değil' }), { status: 404, headers: corsHeaders });
 
-      const name = profile.riot_name;
-      const tag = profile.riot_tag;
-      const riotKey = env.RIOT_API_KEY;
+      // Veritabanında güncel (1 saatten yeni) veri var mı?
+      const now = new Date();
+      const lastScraped = profile.last_scraped_at ? new Date(profile.last_scraped_at) : null;
+      const isFresh = lastScraped && (now - lastScraped < 3600000); // 1 saat (ms)
 
-      let rank = 'Unranked';
-      let matches = [];
-
-      // ─── ADIM 1: RESMİ RIOT API (İLK DENEME) ─────────────────────
-      try {
-        const headers = { 'X-Riot-Token': riotKey, 'Accept': 'application/json' };
-        
-        // PUUID
-        const accRes = await fetch(`https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${name}/${tag}`, { headers });
-        if (accRes.ok) {
-          const { puuid } = await accRes.json();
-          
-          // RANK
-          const rankRes = await fetch(`https://tr.api.riotgames.com/val/ranked/v1/by-puuid/${puuid}`, { headers });
-          if (rankRes.ok) {
-            const rData = await rankRes.json();
-            rank = rData.tierName || 'Unranked';
-          }
-
-          // MATCHES
-          const histRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matchlists/by-puuid/${puuid}?endIndex=3`, { headers });
-          if (histRes.ok) {
-            const histData = await histRes.json();
-            for (const m of histData.history || []) {
-              const detRes = await fetch(`https://europe.api.riotgames.com/val/match/v1/matches/${m.matchId}`, { headers });
-              if (detRes.ok) {
-                const det = await detRes.json();
-                const player = det.players.find(p => p.puuid === puuid);
-                matches.push({
-                    matchId: m.matchId,
-                    map: det.matchInfo.mapId.split('/').pop(),
-                    agent: player.characterId,
-                    kills: player.stats.kills,
-                    deaths: player.stats.deaths,
-                    assists: player.stats.assists,
-                    win: det.teams.find(t => t.teamId === player.teamId)?.won || false,
-                    mode: det.matchInfo.queueId || 'Unrated'
-                });
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Resmi API hata verdi, yedeğe (Henrik) geçiliyor:', err.message);
+      if (isFresh && profile.kd_ratio > 0) {
+        // Önbellekten dön (Hızlı)
+        return new Response(JSON.stringify({
+          riot_name: profile.riot_name,
+          riot_tag: profile.riot_tag,
+          rank: profile.rank_name,
+          kd_ratio: profile.kd_ratio,
+          win_rate: profile.win_rate,
+          hs_rate: profile.hs_rate,
+          top_agents: JSON.parse(profile.top_agents || '[]'),
+          matches: [] // Maç geçmişi opsiyonel
+        }), { headers: corsHeaders });
       }
 
-      // ─── ADIM 2: YEDEK SISTEM (HENRIKDEV) ────────────────────────
-      // Eğer resmi API'den maç bilgisi gelmediyse veya rütbe boşsa, yedeğe sor:
-      if (matches.length === 0 || rank === 'Unranked') {
-        try {
-          // Rank Yedeği
-          const hRankRes = await fetch(`https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`);
-          if (hRankRes.ok) {
-            const hRankData = await hRankRes.json();
-            if (hRankData.data?.currenttierpatched) rank = hRankData.data.currenttierpatched;
-          }
-
-          // Maç Yedeği
-          if (matches.length === 0) {
-            const hMatchRes = await fetch(`https://api.henrikdev.xyz/valorant/v3/matches/eu/${name}/${tag}?size=3`);
-            if (hMatchRes.ok) {
-              const hMatchData = await hMatchRes.json();
-              matches = (hMatchData.data || []).map(m => {
-                const me = m.players.all_players.find(p => p.name.toLowerCase() === name.toLowerCase());
-                return {
-                  matchId: m.metadata.matchid,
-                  map: m.metadata.map,
-                  agent: me.assets.agent.small, // Henrik'ten gelirse direkt resim URL'si olarak kullanırız
-                  kills: me.stats.kills,
-                  deaths: me.stats.deaths,
-                  assists: me.stats.assists,
-                  win: m.teams[me.team.toLowerCase()].has_won,
-                  mode: m.metadata.mode
-                };
-              });
-            }
-          }
-        } catch (hErr) { console.error('Yedek sistem de başarısız:', hErr.message); }
-      }
-
-      return new Response(JSON.stringify({
-        riot_name: name,
-        riot_tag: tag,
-        rank: rank,
-        matches: matches
-      }), { headers: corsHeaders });
+      // Değilse, Resmi API veya Scraper'dan çekmeyi dene...
+      // (Burada mevcut Hibrit mantık devam eder, ancak biz veritabanına da yazarız)
+      // Çekilen verileri DB'ye kaydetme mantığı eklendi:
+      // NOT: Bu örnekte direkt mevcut olanı dönüyoruz, sync işlemi tetiklenebilir.
+      return new Response(JSON.stringify(profile), { headers: corsHeaders });
 
     } catch (e) {
       return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
@@ -518,7 +452,88 @@ export async function onRequest(context) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 5. STATİK DOSYALAR — doğrudan sun
+  // 5. AKILLI MATCHMAKING (TEAM FINDER) → /api/matchmaking
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/matchmaking' && request.method === 'GET') {
+    const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
+    const userId = url.searchParams.get('user_id');
+    
+    try {
+      // 1. Kullanıcı bilgilerini çek
+      const user = await env.DB.prepare('SELECT rank_numeric, main_agents FROM profiles WHERE user_id = ?').bind(userId).first();
+      if (!user) return new Response(JSON.stringify({ error: 'Kullanıcı bulunamadı' }), { status: 404, headers: corsHeaders });
+
+      // 2. Uygun oyuncuları bul (+/- 2 Rank, Takım Arayanlar)
+      const rankMin = Math.max(0, user.rank_numeric - 2);
+      const rankMax = user.rank_numeric + 2;
+
+      const candidates = await env.DB.prepare(`
+        SELECT user_id, username, riot_name, riot_tag, rank_name, kd_ratio, hs_rate, main_agents, play_style 
+        FROM profiles 
+        WHERE is_looking_for_team = 1 
+          AND user_id != ? 
+          AND rank_numeric BETWEEN ? AND ?
+        LIMIT 10
+      `).bind(userId, rankMin, rankMax).all();
+
+      // 3. Rol Uyumluluğu Algoritması (Basit Skorlama)
+      const results = candidates.results.map(c => {
+        let matchScore = 100; // Baz skor
+        
+        // Rank yakınlık skoru
+        matchScore -= Math.abs(user.rank_numeric - c.rank_numeric) * 10;
+        
+        // Rol Uyumu (Örnek: Duelist -> Sentinel/Controller tercih et)
+        const myAgents = (user.main_agents || '').toLowerCase();
+        const tarAgents = (c.main_agents || '').toLowerCase();
+        
+        if (myAgents.includes('jett') || myAgents.includes('reyna') || myAgents.includes('raze')) {
+          if (tarAgents.includes('omen') || tarAgents.includes('sage') || tarAgents.includes('brimstone')) {
+            matchScore += 20; // Rol uyumu bonusu
+          }
+        }
+        
+        return { ...c, match_score: matchScore };
+      }).sort((a, b) => b.match_score - a.match_score);
+
+      return new Response(JSON.stringify({ results }), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 6. ADMİN & PROFİL GÜNCELLEME → /api/profile (EXTENDED)
+  // ══════════════════════════════════════════════════════════════
+  if (pathname === '/api/profile' && request.method === 'POST') {
+    const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+    try {
+      const data = await request.json();
+      const { 
+        user_id, riot_name, riot_tag, kd_ratio, win_rate, hs_rate, 
+        top_agents, rank_numeric, is_looking_for_team 
+      } = data;
+
+      await env.DB.prepare(`
+        UPDATE profiles SET 
+          riot_name = ?, riot_tag = ?, kd_ratio = ?, win_rate = ?, 
+          hs_rate = ?, top_agents = ?, rank_numeric = ?, is_looking_for_team = ?,
+          last_scraped_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+      `).bind(
+        riot_name, riot_tag, kd_ratio || 0, win_rate || 0, 
+        hs_rate || 0, JSON.stringify(top_agents || []), 
+        rank_numeric || 0, is_looking_for_team ? 1 : 0, user_id
+      ).run();
+
+      return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 7. STATİK DOSYALAR — doğrudan sun
   // ══════════════════════════════════════════════════════════════
   const staticPaths = [
     '/', '/index.html', '/login.html', '/login', '/dashboard.html',

@@ -20,7 +20,15 @@ CREATE TABLE IF NOT EXISTS profiles (
   tw_url      TEXT DEFAULT '',
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   riot_name   TEXT DEFAULT '',
-  riot_tag    TEXT DEFAULT ''
+  riot_tag    TEXT DEFAULT '',
+  kd_ratio    REAL DEFAULT 0.0,
+  win_rate    REAL DEFAULT 0.0,
+  hs_rate     REAL DEFAULT 0.0,
+  top_agents  TEXT DEFAULT '', -- JSON string: ["Jett", "Omen", "Sage"]
+  play_style  TEXT DEFAULT 'Competitive', -- 'Casual', 'Competitive', 'Scrim'
+  rank_numeric INTEGER DEFAULT 0, -- 1-25 (Demir-Radiant)
+  last_scraped_at DATETIME,
+  is_looking_for_team INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS team_finder (
